@@ -2,23 +2,25 @@
 
 // Terceiros
 import { NavigationContainer } from "@react-navigation/native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 // Elementos
-import HomeScreen from "./screens/HomeScreen";
-import TaskScreen from "./screens/TaskScreen";
-import StatsScreen from "./screens/StatsScreen";
+import TaskListScreen from "./screens/TaskListScreen";
+import TaskFormScreen from "./screens/TaskFormScreen";
 
-const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 export default function App() {
     return (
         <NavigationContainer>
-            <Tab.Navigator>
-                <Tab.Screen name="Início" component={HomeScreen} />
-                <Tab.Screen name="Tarefas" component={TaskScreen} />
-                <Tab.Screen name="Progresso" component={StatsScreen} />
-            </Tab.Navigator>
+            <Stack.Navigator initialRouteName="List">
+                <Stack.Screen
+                    name="List"
+                    component={TaskListScreen}
+                    options={{ title: "Tarefas" }}
+                />
+                <Stack.Screen name="Form" component={TaskFormScreen} />
+            </Stack.Navigator>
         </NavigationContainer>
     );
 }

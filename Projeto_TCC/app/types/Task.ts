@@ -2,5 +2,8 @@
 export type Task = {
     id: string;
     title: string;
-    done: boolean;
+    notes?: string;
+    dueDate?: string;
+    completed: boolean;
+    createdAt: string;
 };
