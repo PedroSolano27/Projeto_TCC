@@ -1,5 +1,8 @@
 // App principal
 
+// Tipos
+import { RootStackParamList } from "./types/StackParamList";
+
 // Terceiros
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
@@ -7,7 +10,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import TaskFormScreen from "./screens/TaskFormScreen";
 import TaskListScreen from "./screens/TaskListScreen";
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
     return (

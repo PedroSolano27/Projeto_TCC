@@ -2,6 +2,7 @@
 // Tela de Lista de Tarefas
 
 // Tipos
+import { RootStackParamList } from "../types/StackParamList";
 import { Task } from "../types/Task";
 
 // Terceiros
@@ -18,11 +19,6 @@ import {
     ViewComponent,
 } from "react-native";
 import TaskItem from "../components/TaskItem";
-
-type RootStackParamList = {
-    List: undefined;
-    Form: { task?: Task } | undefined;
-};
 
 type Props = NativeStackScreenProps<RootStackParamList, "List">;
 

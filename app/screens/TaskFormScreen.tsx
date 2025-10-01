@@ -1,6 +1,7 @@
 // Tela de Formulário de Tarefas
 
 // Tipos
+import { RootStackParamList } from "../types/StackParamList";
 import { Task } from "../types/Task";
 
 // Terceiros
@@ -18,11 +19,6 @@ import {
     TouchableOpacity,
     ViewComponent,
 } from "react-native";
-
-type RootStackParamList = {
-    List: undefined;
-    Form: { task?: Task } | undefined;
-};
 
 type Props = NativeStackScreenProps<RootStackParamList, "Form">;
 
