@@ -4,19 +4,19 @@
 import { Task } from "../types/Task";
 
 // Terceiros
-import { v4 as uuidv4 } from "uuid";
-import { useState, useEffect } from "react";
-import { TaskStorage } from "../services/TaskStorage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { TaskStorage } from "../services/TaskStorage";
 
 // Elementos
 import {
-    View,
-    Text,
-    TextInput,
-    StyleSheet,
-    TouchableOpacity,
     Platform,
+    StyleSheet,
+    TextComponent,
+    TextInputComponent,
+    TouchableOpacity,
+    ViewComponent,
 } from "react-native";
 
 type RootStackParamList = {
@@ -40,6 +40,7 @@ export default function TaskFormScreen({ route, navigation }: Props) {
     async function save() {
         if (!title.trim()) return;
 
+        // Atualiza se já existe
         if (existing) {
             const updated: Task = { ...existing, title, notes, dueDate };
             await updateTask(updated);
@@ -47,6 +48,7 @@ export default function TaskFormScreen({ route, navigation }: Props) {
             navigation.goBack();
         }
 
+        // Cria tarefa nova
         const newTask: Task = {
             id: uuidv4(),
             title,
@@ -68,17 +70,17 @@ export default function TaskFormScreen({ route, navigation }: Props) {
     }, [existing, navigation]);
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.label}>Título</Text>
-            <TextInput
+        <ViewComponent style={styles.container}>
+            <TextComponent style={styles.label}>Título</TextComponent>
+            <TextInputComponent
                 value={title}
                 onChangeText={setTitle}
                 style={styles.input}
-                placeholder="Ex: Estudar React Native"
+                placeholder="Ex: Estudar para Prova"
             />
 
-            <Text style={styles.label}>Notas</Text>
-            <TextInput
+            <TextComponent style={styles.label}>Notas</TextComponent>
+            <TextInputComponent
                 value={notes}
                 onChangeText={setNotes}
                 style={[styles.input, { height: 80 }]}
@@ -86,18 +88,20 @@ export default function TaskFormScreen({ route, navigation }: Props) {
                 placeholder="Detalhes..."
             />
 
-            <Text style={styles.label}>Data de Vencimento (ISO ou texto)</Text>
-            <TextInput
+            <TextComponent style={styles.label}>
+                Data de Vencimento
+            </TextComponent>
+            <TextInputComponent
                 value={dueDate}
                 onChangeText={setDueDate}
                 style={styles.input}
-                placeholder="2025-10-01T18:00:00"
+                placeholder="01/10/2025"
             />
 
             <TouchableOpacity onPress={save} style={styles.saveBtn}>
-                <Text style={styles.saveText}>Salvar</Text>
+                <TextComponent style={styles.saveText}>Salvar</TextComponent>
             </TouchableOpacity>
-        </View>
+        </ViewComponent>
     );
 }
 

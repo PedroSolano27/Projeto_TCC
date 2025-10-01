@@ -5,17 +5,17 @@
 import { Task } from "../types/Task";
 
 // Terceiros
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import { TaskStorage } from "../services/TaskStorage";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 // Elementos
 import {
-    View,
-    Text,
     FlatList,
     StyleSheet,
+    TextComponent,
     TouchableOpacity,
+    ViewComponent,
 } from "react-native";
 import TaskItem from "../components/TaskItem";
 
@@ -24,7 +24,7 @@ type RootStackParamList = {
     Form: { task?: Task } | undefined;
 };
 
-type Props = NativeStackScreenProps<RootStackParamList, 'List'>;
+type Props = NativeStackScreenProps<RootStackParamList, "List">;
 
 export default function TaskListScreen({ navigation }: Props) {
     const { getAllTasks, updateTask, removeTask } = TaskStorage();
@@ -62,17 +62,19 @@ export default function TaskListScreen({ navigation }: Props) {
     }, [navigation]);
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Minhas Tarefas</Text>
+        <ViewComponent style={styles.container}>
+            <ViewComponent style={styles.header}>
+                <TextComponent style={styles.title}>
+                    Minhas Tarefas
+                </TextComponent>
 
                 <TouchableOpacity
                     onPress={() => navigation.navigate("Form")}
                     style={styles.addBtn}
                 >
-                    <Text style={styles.addText}>+ Nova</Text>
+                    <TextComponent style={styles.addText}>+ Nova</TextComponent>
                 </TouchableOpacity>
-            </View>
+            </ViewComponent>
 
             <FlatList
                 data={tasks}
@@ -86,10 +88,12 @@ export default function TaskListScreen({ navigation }: Props) {
                     />
                 )}
                 ListEmptyComponent={
-                    <Text style={styles.empty}>Nenhuma tarefa cadastrada</Text>
+                    <TextComponent style={styles.empty}>
+                        Nenhuma tarefa cadastrada
+                    </TextComponent>
                 }
             />
-        </View>
+        </ViewComponent>
     );
 }
 

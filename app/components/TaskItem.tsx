@@ -4,7 +4,12 @@
 import { Task } from "../types/Task";
 
 // Terceiros
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+    StyleSheet,
+    TextComponent,
+    TouchableOpacity,
+    ViewComponent,
+} from "react-native";
 
 type Props = {
     task: Task;
@@ -15,51 +20,55 @@ type Props = {
 
 export default function TaskItem({ task, onToggle, onEdit, onDelete }: Props) {
     return (
-        <View style={styles.container}>
+        <ViewComponent style={styles.container}>
             <TouchableOpacity
                 onPress={() => onToggle(task.id)}
                 style={styles.left}
             >
-                <View
+                <ViewComponent
                     style={[styles.checkbox, task.completed && styles.checked]}
                 />
 
-                <View style={styles.meta}>
-                    <Text
+                <ViewComponent style={styles.meta}>
+                    <TextComponent
                         style={[
                             styles.title,
                             task.completed && styles.completed,
                         ]}
                     >
                         {task.title}
-                    </Text>
+                    </TextComponent>
 
                     {task.dueDate ? (
-                        <Text style={styles.due}>
+                        <TextComponent style={styles.due}>
                             {new Date(task.dueDate).toLocaleString()}
-                        </Text>
+                        </TextComponent>
                     ) : null}
-                </View>
+                </ViewComponent>
             </TouchableOpacity>
 
-            <View style={styles.actions}>
+            <ViewComponent style={styles.actions}>
                 <TouchableOpacity
                     onPress={() => onEdit(task)}
                     style={styles.actionBtn}
                 >
-                    <Text style={styles.actionText}>Editar</Text>
+                    <TextComponent style={styles.actionText}>
+                        Editar
+                    </TextComponent>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     onPress={() => onDelete(task.id)}
                     style={styles.actionBtn}
                 >
-                    <Text style={[styles.actionText, { color: "#c0392b" }]}>
+                    <TextComponent
+                        style={[styles.actionText, { color: "#c0392b" }]}
+                    >
                         Excluir
-                    </Text>
+                    </TextComponent>
                 </TouchableOpacity>
-            </View>
-        </View>
+            </ViewComponent>
+        </ViewComponent>
     );
 }
 
