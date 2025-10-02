@@ -13,6 +13,7 @@ import { TaskStorage } from "../services/TaskStorage";
 
 // Elementos
 import {
+    Alert,
     Platform,
     StyleSheet,
     Text,
@@ -35,7 +36,13 @@ export default function TaskFormScreen({ route, navigation }: Props) {
 
     // Cria uma tarefa nova ou salva uma editada
     async function save() {
-        if (!title.trim()) return;
+        if (!title) {
+            Alert.alert(
+                "Campo obrigatório",
+                "Por favor, insira um título para a tarefa.",
+            );
+            return;
+        }
 
         // Atualiza se já existe
         if (existing) {
@@ -43,6 +50,7 @@ export default function TaskFormScreen({ route, navigation }: Props) {
             await updateTask(updated);
 
             navigation.goBack();
+            return;
         }
 
         // Cria tarefa nova
@@ -72,7 +80,7 @@ export default function TaskFormScreen({ route, navigation }: Props) {
             <TextInput
                 value={title}
                 onChangeText={setTitle}
-                style={styles.input}
+                style={[styles.input, !title && styles.inputError]}
                 placeholder="Ex: Estudar para Prova"
             />
 
@@ -93,7 +101,11 @@ export default function TaskFormScreen({ route, navigation }: Props) {
                 placeholder="01/10/2025"
             />
 
-            <TouchableOpacity onPress={save} style={styles.saveBtn}>
+            <TouchableOpacity
+                onPress={save}
+                disabled={!title}
+                style={[styles.saveBtn, !title && styles.saveBtnDisabled]}
+            >
                 <Text style={styles.saveText}>Salvar</Text>
             </TouchableOpacity>
         </View>
@@ -115,6 +127,7 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: "#fff",
     },
+    inputError: { borderColor: "#e74c3c" },
     saveBtn: {
         marginTop: 20,
         backgroundColor: "#27ae60",
@@ -122,5 +135,6 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: "center",
     },
+    saveBtnDisabled: { backgroundColor: "#9bd6a6" },
     saveText: { color: "#fff", fontWeight: "600" },
 });

@@ -12,6 +12,7 @@ import { TaskStorage } from "../services/TaskStorage";
 
 // Elementos
 import {
+    Alert,
     FlatList,
     StyleSheet,
     Text,
@@ -46,8 +47,22 @@ export default function TaskListScreen({ navigation }: Props) {
 
     // Remove uma tarefa
     async function del(id: string) {
-        await removeTask(id);
-        load();
+        Alert.alert(
+            "Confirmar",
+            "Tem certeza que deseja excluir esta tarefa?",
+            [
+                { text: "Cancelar", style: "cancel" },
+                {
+                    text: "Excluir",
+                    style: "destructive",
+                    onPress: async () => {
+                        await removeTask(id);
+                        load();
+                    },
+                },
+            ],
+            { cancelable: true },
+        );
     }
 
     useEffect(() => {
