@@ -7,6 +7,7 @@ import { Task } from "../types/Task";
 // Terceiros
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
+import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
 import { TaskStorage } from "../services/TaskStorage";
 
@@ -14,10 +15,10 @@ import { TaskStorage } from "../services/TaskStorage";
 import {
     Platform,
     StyleSheet,
-    TextComponent,
-    TextInputComponent,
+    Text,
+    TextInput,
     TouchableOpacity,
-    ViewComponent,
+    View,
 } from "react-native";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Form">;
@@ -66,17 +67,17 @@ export default function TaskFormScreen({ route, navigation }: Props) {
     }, [existing, navigation]);
 
     return (
-        <ViewComponent style={styles.container}>
-            <TextComponent style={styles.label}>Título</TextComponent>
-            <TextInputComponent
+        <View style={styles.container}>
+            <Text style={styles.label}>Título</Text>
+            <TextInput
                 value={title}
                 onChangeText={setTitle}
                 style={styles.input}
                 placeholder="Ex: Estudar para Prova"
             />
 
-            <TextComponent style={styles.label}>Notas</TextComponent>
-            <TextInputComponent
+            <Text style={styles.label}>Notas</Text>
+            <TextInput
                 value={notes}
                 onChangeText={setNotes}
                 style={[styles.input, { height: 80 }]}
@@ -84,10 +85,8 @@ export default function TaskFormScreen({ route, navigation }: Props) {
                 placeholder="Detalhes..."
             />
 
-            <TextComponent style={styles.label}>
-                Data de Vencimento
-            </TextComponent>
-            <TextInputComponent
+            <Text style={styles.label}>Data de Vencimento</Text>
+            <TextInput
                 value={dueDate}
                 onChangeText={setDueDate}
                 style={styles.input}
@@ -95,9 +94,9 @@ export default function TaskFormScreen({ route, navigation }: Props) {
             />
 
             <TouchableOpacity onPress={save} style={styles.saveBtn}>
-                <TextComponent style={styles.saveText}>Salvar</TextComponent>
+                <Text style={styles.saveText}>Salvar</Text>
             </TouchableOpacity>
-        </ViewComponent>
+        </View>
     );
 }
 

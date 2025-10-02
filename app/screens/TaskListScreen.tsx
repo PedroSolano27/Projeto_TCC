@@ -14,9 +14,9 @@ import { TaskStorage } from "../services/TaskStorage";
 import {
     FlatList,
     StyleSheet,
-    TextComponent,
+    Text,
     TouchableOpacity,
-    ViewComponent,
+    View,
 } from "react-native";
 import TaskItem from "../components/TaskItem";
 
@@ -58,19 +58,17 @@ export default function TaskListScreen({ navigation }: Props) {
     }, [navigation]);
 
     return (
-        <ViewComponent style={styles.container}>
-            <ViewComponent style={styles.header}>
-                <TextComponent style={styles.title}>
-                    Minhas Tarefas
-                </TextComponent>
+        <View style={styles.container}>
+            <View style={styles.header}>
+                <Text style={styles.title}>Minhas Tarefas</Text>
 
                 <TouchableOpacity
                     onPress={() => navigation.navigate("Form")}
                     style={styles.addBtn}
                 >
-                    <TextComponent style={styles.addText}>+ Nova</TextComponent>
+                    <Text style={styles.addText}>+ Nova</Text>
                 </TouchableOpacity>
-            </ViewComponent>
+            </View>
 
             <FlatList
                 data={tasks}
@@ -84,12 +82,10 @@ export default function TaskListScreen({ navigation }: Props) {
                     />
                 )}
                 ListEmptyComponent={
-                    <TextComponent style={styles.empty}>
-                        Nenhuma tarefa cadastrada
-                    </TextComponent>
+                    <Text style={styles.empty}>Nenhuma tarefa cadastrada</Text>
                 }
             />
-        </ViewComponent>
+        </View>
     );
 }
 
