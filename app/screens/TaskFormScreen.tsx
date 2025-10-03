@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from "uuid";
 import { TaskStorage } from "../services/TaskStorage";
 
 // Elementos
+import DateTimePicker from "@react-native-community/datetimepicker";
 import {
     Alert,
     Platform,
@@ -33,6 +34,10 @@ export default function TaskFormScreen({ route, navigation }: Props) {
     const [title, setTitle] = useState(existing?.title || "");
     const [notes, setNotes] = useState(existing?.notes || "");
     const [dueDate, setDueDate] = useState(existing?.dueDate || "");
+    const [showPicker, setShowPicker] = useState(false);
+    const [date, setDate] = useState(
+        existing?.dueDate ? new Date(existing.dueDate) : new Date(),
+    );
 
     // Cria uma tarefa nova ou salva uma editada
     async function save() {
@@ -67,6 +72,15 @@ export default function TaskFormScreen({ route, navigation }: Props) {
         navigation.goBack();
     }
 
+    // Salva a data
+    function onChangeDate(_: any, selectedDate?: Date) {
+        setShowPicker(false);
+        if (selectedDate) {
+            setDate(selectedDate);
+            setDueDate(selectedDate.toISOString());
+        }
+    }
+
     // Mostra o título correto
     useEffect(() => {
         navigation.setOptions({
@@ -94,12 +108,25 @@ export default function TaskFormScreen({ route, navigation }: Props) {
             />
 
             <Text style={styles.label}>Data de Vencimento</Text>
-            <TextInput
-                value={dueDate}
-                onChangeText={setDueDate}
-                style={styles.input}
-                placeholder="01/10/2025"
-            />
+            <TouchableOpacity
+                onPress={() => setShowPicker(true)}
+                style={styles.dateBtn}
+            >
+                <Text style={styles.dateText}>
+                    {date
+                        ? date.toLocaleDateString("pt-BR")
+                        : "Selecionar data"}
+                </Text>
+            </TouchableOpacity>
+
+            {showPicker && (
+                <DateTimePicker
+                    value={date}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={onChangeDate}
+                />
+            )}
 
             <TouchableOpacity
                 onPress={save}
@@ -135,6 +162,18 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: "center",
     },
+    dateBtn: {
+        borderWidth: 1,
+        borderColor: "#ddd",
+        borderRadius: 8,
+        padding: 12,
+        backgroundColor: "#fff",
+        marginBottom: 10,
+    },
     saveBtnDisabled: { backgroundColor: "#9bd6a6" },
     saveText: { color: "#fff", fontWeight: "600" },
+    dateText: {
+        fontSize: 16,
+        color: "#333",
+    },
 });
