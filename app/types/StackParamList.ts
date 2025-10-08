@@ -5,4 +5,5 @@ import { Task } from "./Task";
 export type RootStackParamList = {
     List: undefined;
     Form: { task?: Task } | undefined;
+    Settings: undefined;
 };
