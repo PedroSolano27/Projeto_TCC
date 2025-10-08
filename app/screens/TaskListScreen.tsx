@@ -27,6 +27,16 @@ export default function TaskListScreen({ navigation }: Props) {
     const { getAllTasks, updateTask, removeTask } = TaskStorage();
 
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [filter, setFilter] = useState<"all" | "completed" | "pending">(
+        "completed",
+    );
+
+    // Filtra as tarefas
+    const filteredTasks = tasks.filter((task) => {
+        if (filter === "completed") return task.completed;
+        if (filter === "pending") return !task.completed;
+        return true; // 'all'
+    });
 
     // Carrega tarefas
     async function load() {
@@ -85,8 +95,40 @@ export default function TaskListScreen({ navigation }: Props) {
                 </TouchableOpacity>
             </View>
 
+            <View style={styles.filterContainer}>
+                <TouchableOpacity
+                    onPress={() => setFilter("all")}
+                    style={[
+                        styles.filterBtn,
+                        filter === "all" && styles.filterActive,
+                    ]}
+                >
+                    <Text style={styles.filterText}>Todas</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={() => setFilter("pending")}
+                    style={[
+                        styles.filterBtn,
+                        filter === "pending" && styles.filterActive,
+                    ]}
+                >
+                    <Text style={styles.filterText}>Pendentes</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={() => setFilter("completed")}
+                    style={[
+                        styles.filterBtn,
+                        filter === "completed" && styles.filterActive,
+                    ]}
+                >
+                    <Text style={styles.filterText}>Concluídas</Text>
+                </TouchableOpacity>
+            </View>
+
             <FlatList
-                data={tasks}
+                data={filteredTasks}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                     <TaskItem
@@ -107,6 +149,11 @@ export default function TaskListScreen({ navigation }: Props) {
 // Estilos
 const styles = StyleSheet.create({
     container: { flex: 1, paddingTop: 40, paddingHorizontal: 16 },
+    filterContainer: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        marginBottom: 12,
+    },
     header: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -120,6 +167,19 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         borderRadius: 8,
     },
+    filterBtn: {
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+        backgroundColor: "#eee",
+    },
     addText: { color: "#fff", fontWeight: "600" },
+    filterText: {
+        color: "#333",
+        fontWeight: "500",
+    },
     empty: { textAlign: "center", marginTop: 40, color: "#666" },
+    filterActive: {
+        backgroundColor: "#0984e3",
+    },
 });
