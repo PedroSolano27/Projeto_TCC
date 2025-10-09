@@ -4,7 +4,9 @@
 import { Task } from "../types/Task";
 
 // Terceiros
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import { useTheme } from "../context/ThemeContext";
+import { createStyles } from "../styles/ScreenStyles";
 
 type Props = {
     task: Task;
@@ -14,47 +16,53 @@ type Props = {
 };
 
 export default function TaskItem({ task, onToggle, onEdit, onDelete }: Props) {
+    const { theme } = useTheme();
+    const { TaskStyles } = createStyles(theme);
+
     return (
-        <View style={styles.container}>
+        <View style={TaskStyles.container}>
             <TouchableOpacity
                 onPress={() => onToggle(task.id)}
-                style={styles.left}
+                style={TaskStyles.left}
             >
                 <View
-                    style={[styles.checkbox, task.completed && styles.checked]}
+                    style={[
+                        TaskStyles.checkbox,
+                        task.completed && TaskStyles.checked,
+                    ]}
                 />
 
-                <View style={styles.meta}>
+                <View style={TaskStyles.meta}>
                     <Text
                         style={[
-                            styles.title,
-                            task.completed && styles.completed,
+                            TaskStyles.title,
+                            task.completed && TaskStyles.completed,
                         ]}
                     >
                         {task.title}
                     </Text>
 
                     {task.dueDate ? (
-                        <Text style={styles.due}>
+                        <Text style={TaskStyles.due}>
                             {new Date(task.dueDate).toLocaleString()}
                         </Text>
                     ) : null}
                 </View>
             </TouchableOpacity>
 
-            <View style={styles.actions}>
+            <View style={TaskStyles.actions}>
                 <TouchableOpacity
                     onPress={() => onEdit(task)}
-                    style={styles.actionBtn}
+                    style={TaskStyles.actionBtn}
                 >
-                    <Text style={styles.actionText}>Editar</Text>
+                    <Text style={TaskStyles.actionText}>Editar</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     onPress={() => onDelete(task.id)}
-                    style={styles.actionBtn}
+                    style={TaskStyles.actionBtn}
                 >
-                    <Text style={[styles.actionText, { color: "#c0392b" }]}>
+                    <Text style={[TaskStyles.actionText, { color: "#c0392b" }]}>
                         Excluir
                     </Text>
                 </TouchableOpacity>
@@ -62,31 +70,3 @@ export default function TaskItem({ task, onToggle, onEdit, onDelete }: Props) {
         </View>
     );
 }
-
-// Estilos
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 12,
-        borderBottomWidth: 1,
-        borderColor: "#eee",
-    },
-    left: { flexDirection: "row", alignItems: "center", flex: 1 },
-    checkbox: {
-        width: 24,
-        height: 24,
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: "#555",
-        marginRight: 12,
-    },
-    checked: { backgroundColor: "#27ae60", borderColor: "#27ae60" },
-    meta: { flex: 1 },
-    title: { fontSize: 16, color: "#222" },
-    completed: { textDecorationLine: "line-through", color: "#8e8e8e" },
-    due: { fontSize: 12, color: "#666", marginTop: 4 },
-    actions: { flexDirection: "row" },
-    actionBtn: { marginLeft: 8, padding: 8 },
-    actionText: { color: "#0984e3" },
-});

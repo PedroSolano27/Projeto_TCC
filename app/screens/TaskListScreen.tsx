@@ -8,33 +8,31 @@ import { Task } from "../types/Task";
 // Terceiros
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
+import { useTheme } from "../context/ThemeContext";
 import { TaskStorage } from "../services/TaskStorage";
+import { createStyles } from "../styles/ScreenStyles";
 
 // Elementos
-import {
-    Alert,
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
 import TaskItem from "../components/TaskItem";
 
 type Props = NativeStackScreenProps<RootStackParamList, "List">;
 
 export default function TaskListScreen({ navigation }: Props) {
+    const { theme } = useTheme();
     const { getAllTasks, updateTask, removeTask } = TaskStorage();
+    const { TaskListStyles } = createStyles(theme);
 
     const [tasks, setTasks] = useState<Task[]>([]);
     const [filter, setFilter] = useState<"all" | "completed" | "pending">(
-        "completed",
+        "pending",
     );
 
     // Filtra as tarefas
     const filteredTasks = tasks.filter((task) => {
         if (filter === "completed") return task.completed;
         if (filter === "pending") return !task.completed;
+
         return true; // 'all'
     });
 
@@ -83,47 +81,54 @@ export default function TaskListScreen({ navigation }: Props) {
     }, [navigation]);
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Minhas Tarefas</Text>
+        <View style={TaskListStyles.container}>
+            <View style={TaskListStyles.header}>
+                <Text style={TaskListStyles.title}>Minhas Tarefas</Text>
+
+                <TouchableOpacity
+                    onPress={() => navigation.navigate("Settings")}
+                    style={TaskListStyles.addBtn}
+                >
+                    <Text style={TaskListStyles.addText}>Opções</Text>
+                </TouchableOpacity>
 
                 <TouchableOpacity
                     onPress={() => navigation.navigate("Form")}
-                    style={styles.addBtn}
+                    style={TaskListStyles.addBtn}
                 >
-                    <Text style={styles.addText}>+ Nova</Text>
+                    <Text style={TaskListStyles.addText}>+ Nova</Text>
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.filterContainer}>
+            <View style={TaskListStyles.filterContainer}>
                 <TouchableOpacity
                     onPress={() => setFilter("all")}
                     style={[
-                        styles.filterBtn,
-                        filter === "all" && styles.filterActive,
+                        TaskListStyles.filterBtn,
+                        filter === "all" && TaskListStyles.filterActive,
                     ]}
                 >
-                    <Text style={styles.filterText}>Todas</Text>
+                    <Text style={TaskListStyles.filterText}>Todas</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     onPress={() => setFilter("pending")}
                     style={[
-                        styles.filterBtn,
-                        filter === "pending" && styles.filterActive,
+                        TaskListStyles.filterBtn,
+                        filter === "pending" && TaskListStyles.filterActive,
                     ]}
                 >
-                    <Text style={styles.filterText}>Pendentes</Text>
+                    <Text style={TaskListStyles.filterText}>Pendentes</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     onPress={() => setFilter("completed")}
                     style={[
-                        styles.filterBtn,
-                        filter === "completed" && styles.filterActive,
+                        TaskListStyles.filterBtn,
+                        filter === "completed" && TaskListStyles.filterActive,
                     ]}
                 >
-                    <Text style={styles.filterText}>Concluídas</Text>
+                    <Text style={TaskListStyles.filterText}>Concluídas</Text>
                 </TouchableOpacity>
             </View>
 
@@ -139,47 +144,11 @@ export default function TaskListScreen({ navigation }: Props) {
                     />
                 )}
                 ListEmptyComponent={
-                    <Text style={styles.empty}>Nenhuma tarefa cadastrada</Text>
+                    <Text style={TaskListStyles.empty}>
+                        Nenhuma tarefa cadastrada
+                    </Text>
                 }
             />
         </View>
     );
 }
-
-// Estilos
-const styles = StyleSheet.create({
-    container: { flex: 1, paddingTop: 40, paddingHorizontal: 16 },
-    filterContainer: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        marginBottom: 12,
-    },
-    header: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 12,
-    },
-    title: { fontSize: 24, fontWeight: "600" },
-    addBtn: {
-        backgroundColor: "#0984e3",
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: 8,
-    },
-    filterBtn: {
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 6,
-        backgroundColor: "#eee",
-    },
-    addText: { color: "#fff", fontWeight: "600" },
-    filterText: {
-        color: "#333",
-        fontWeight: "500",
-    },
-    empty: { textAlign: "center", marginTop: 40, color: "#666" },
-    filterActive: {
-        backgroundColor: "#0984e3",
-    },
-});

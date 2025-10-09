@@ -9,14 +9,15 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
+import { useTheme } from "../context/ThemeContext";
 import { TaskStorage } from "../services/TaskStorage";
+import { createStyles } from "../styles/ScreenStyles";
 
 // Elementos
 import DateTimePicker from "@react-native-community/datetimepicker";
 import {
     Alert,
     Platform,
-    StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
@@ -27,15 +28,17 @@ type Props = NativeStackScreenProps<RootStackParamList, "Form">;
 
 export default function TaskFormScreen({ route, navigation }: Props) {
     const { addTask, updateTask } = TaskStorage();
+    const { theme } = useTheme();
+    const { TaskFormStyles } = createStyles(theme);
 
     // Pega uma Task se ela já existe
     const existing = route.params?.task;
 
-    const [title, setTitle] = useState(existing?.title || "");
-    const [notes, setNotes] = useState(existing?.notes || "");
-    const [dueDate, setDueDate] = useState(existing?.dueDate || "");
-    const [showPicker, setShowPicker] = useState(false);
-    const [date, setDate] = useState(
+    const [title, setTitle] = useState<string>(existing?.title || "");
+    const [notes, setNotes] = useState<string>(existing?.notes || "");
+    const [dueDate, setDueDate] = useState<string>(existing?.dueDate || "");
+    const [showPicker, setShowPicker] = useState<boolean>(false);
+    const [date, setDate] = useState<Date>(
         existing?.dueDate ? new Date(existing.dueDate) : new Date(),
     );
 
@@ -89,30 +92,33 @@ export default function TaskFormScreen({ route, navigation }: Props) {
     }, [existing, navigation]);
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.label}>Título</Text>
+        <View style={TaskFormStyles.container}>
+            <Text style={TaskFormStyles.label}>Título</Text>
             <TextInput
                 value={title}
                 onChangeText={setTitle}
-                style={[styles.input, !title && styles.inputError]}
+                style={[
+                    TaskFormStyles.input,
+                    !title && TaskFormStyles.inputError,
+                ]}
                 placeholder="Ex: Estudar para Prova"
             />
 
-            <Text style={styles.label}>Notas</Text>
+            <Text style={TaskFormStyles.label}>Notas</Text>
             <TextInput
                 value={notes}
                 onChangeText={setNotes}
-                style={[styles.input, { height: 80 }]}
+                style={[TaskFormStyles.input, { height: 80 }]}
                 multiline
                 placeholder="Detalhes..."
             />
 
-            <Text style={styles.label}>Data de Vencimento</Text>
+            <Text style={TaskFormStyles.label}>Data de Vencimento</Text>
             <TouchableOpacity
                 onPress={() => setShowPicker(true)}
-                style={styles.dateBtn}
+                style={TaskFormStyles.dateBtn}
             >
-                <Text style={styles.dateText}>
+                <Text style={TaskFormStyles.dateText}>
                     {date
                         ? date.toLocaleDateString("pt-BR")
                         : "Selecionar data"}
@@ -131,49 +137,13 @@ export default function TaskFormScreen({ route, navigation }: Props) {
             <TouchableOpacity
                 onPress={save}
                 disabled={!title}
-                style={[styles.saveBtn, !title && styles.saveBtnDisabled]}
+                style={[
+                    TaskFormStyles.saveBtn,
+                    !title && TaskFormStyles.saveBtnDisabled,
+                ]}
             >
-                <Text style={styles.saveText}>Salvar</Text>
+                <Text style={TaskFormStyles.saveText}>Salvar</Text>
             </TouchableOpacity>
         </View>
     );
 }
-
-// Estilos
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 16,
-        paddingTop: Platform.OS === "ios" ? 60 : 20,
-    },
-    label: { fontSize: 14, marginTop: 12, marginBottom: 6 },
-    input: {
-        borderWidth: 1,
-        borderColor: "#ddd",
-        borderRadius: 8,
-        padding: 10,
-        backgroundColor: "#fff",
-    },
-    inputError: { borderColor: "#e74c3c" },
-    saveBtn: {
-        marginTop: 20,
-        backgroundColor: "#27ae60",
-        padding: 14,
-        borderRadius: 10,
-        alignItems: "center",
-    },
-    dateBtn: {
-        borderWidth: 1,
-        borderColor: "#ddd",
-        borderRadius: 8,
-        padding: 12,
-        backgroundColor: "#fff",
-        marginBottom: 10,
-    },
-    saveBtnDisabled: { backgroundColor: "#9bd6a6" },
-    saveText: { color: "#fff", fontWeight: "600" },
-    dateText: {
-        fontSize: 16,
-        color: "#333",
-    },
-});
