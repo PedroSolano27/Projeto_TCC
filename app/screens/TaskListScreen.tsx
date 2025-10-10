@@ -7,6 +7,7 @@ import { Task } from "../types/Task";
 
 // Terceiros
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as Notifications from "expo-notifications";
 import { useEffect, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { TaskStorage } from "../services/TaskStorage";
@@ -48,6 +49,15 @@ export default function TaskListScreen({ navigation }: Props) {
         if (!t) return;
 
         const updated = { ...t, completed: !t.completed };
+
+        if (updated.completed && t.notificationId) {
+            // Cancela notificação
+            await Notifications.cancelScheduledNotificationAsync(
+                t.notificationId,
+            );
+            updated.notificationId = null;
+        }
+
         await updateTask(updated);
 
         load();

@@ -53,25 +53,31 @@ export default function TaskFormScreen({ route, navigation }: Props) {
         }
 
         // Atualiza se já existe
-        if (existing) {
-            const updated: Task = { ...existing, title, notes, dueDate };
-            await updateTask(updated);
-
+        if (existing && existing.id) {
+            const updated: Task = {
+                ...existing,
+                title: title.trim(),
+                notes,
+                dueDate,
+            };
+            await updateTask(updated); // já cancela e reagenda
             navigation.goBack();
+
             return;
         }
 
-        // Cria tarefa nova
+        // Cria nova tarefa
         const newTask: Task = {
             id: uuidv4(),
-            title,
+            title: title.trim(),
             notes,
             dueDate,
             completed: false,
             createdAt: new Date().toISOString(),
+            notificationId: null,
         };
-        await addTask(newTask);
 
+        await addTask(newTask); // já agenda
         navigation.goBack();
     }
 

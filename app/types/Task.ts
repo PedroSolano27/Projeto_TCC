@@ -4,6 +4,7 @@ export type Task = {
     title: string;
     notes?: string;
     dueDate?: string;
-    completed: boolean;
     createdAt: string;
+    completed: boolean;
+    notificationId?: string | null;
 };
