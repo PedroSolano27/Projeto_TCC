@@ -129,6 +129,21 @@ export const createStyles = (theme: Theme) => {
                 marginBottom: 12,
                 color: colors.textPrimary,
             },
+            button: {
+                backgroundColor: colors.addBtnBg,
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                borderRadius: 8,
+                marginTop: 12,
+                alignItems: "center",
+            },
+            importButton: {
+                backgroundColor: colors.saveBtnBg,
+            },
+            buttonText: {
+                color: colors.textPrimary,
+                fontWeight: "600",
+            },
         }),
 
         TaskStyles: StyleSheet.create({
