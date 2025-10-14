@@ -1,4 +1,3 @@
-/* eslint-disable import/namespace */
 // Funções para exportar/importar tarefas
 
 // Tipos
@@ -6,10 +5,10 @@ import { Task } from "../types/Task";
 
 // Terceiros
 import * as DocumentPicker from "expo-document-picker";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import { useState } from "react";
-import { Alert, Platform } from "react-native";
+import { Alert } from "react-native";
 import { TaskStorage } from "./TaskStorage";
 
 // Hook que fornece export/import de tarefas
@@ -30,74 +29,24 @@ export function ExportTasks() {
             const json = JSON.stringify(tasks, null, 2);
             const filename = getExportFilename();
 
-            // 1) documentDirectory (nativo, gravável)
-            if (FileSystem.documentDirectory) {
-                const filepath = `${FileSystem.documentDirectory}${filename}`;
-                await FileSystem.writeAsStringAsync(filepath, json, {
-                    encoding: "utf8",
+            const filepath = `${FileSystem.documentDirectory}${filename}`;
+            await FileSystem.writeAsStringAsync(filepath, json, {
+                encoding: "utf8",
+            });
+
+            if (await Sharing.isAvailableAsync()) {
+                await Sharing.shareAsync(filepath, {
+                    mimeType: "application/json",
                 });
-
-                if (await Sharing.isAvailableAsync()) {
-                    await Sharing.shareAsync(filepath, {
-                        mimeType: "application/json",
-                    });
-                    setLoading(false);
-                    return;
-                }
-
-                Alert.alert("Exportar", `Arquivo salvo em: ${filepath}`);
                 setLoading(false);
+
                 return;
             }
 
-            // 2) Android: Storage Access Framework (pede pasta ao usuário)
-            if (
-                Platform.OS === "android" &&
-                (FileSystem as any).StorageAccessFramework
-            ) {
-                const SAF = (FileSystem as any)
-                    .StorageAccessFramework as typeof FileSystem.StorageAccessFramework;
-                const perm = await SAF.requestDirectoryPermissionsAsync();
-                if (!perm.granted) {
-                    Alert.alert(
-                        "Exportar",
-                        "Permissão de pasta não concedida.",
-                    );
-                    setLoading(false);
-                    return;
-                }
-                const baseUri = perm.directoryUri;
-                const fileUri = await SAF.createFileAsync(
-                    baseUri,
-                    filename,
-                    "application/json",
-                );
-                await FileSystem.writeAsStringAsync(fileUri, json, {
-                    encoding: "utf8",
-                });
-                Alert.alert("Exportar", "Arquivo salvo na pasta selecionada.");
-                setLoading(false);
-                return;
-            }
+            Alert.alert("Exportar", `Arquivo salvo em: ${filepath}`);
+            setLoading(false);
 
-            // 3) Web fallback
-            if (Platform.OS === "web") {
-                const blob = new Blob([json], { type: "application/json" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = filename;
-                a.click();
-                URL.revokeObjectURL(url);
-                setLoading(false);
-                return;
-            }
-
-            // 4) Fallback geral
-            Alert.alert(
-                "Exportar",
-                "Não foi possível localizar um diretório gravável neste dispositivo.",
-            );
+            return;
         } catch (err) {
             console.warn("Erro ao exportar tarefas", err);
             Alert.alert("Erro", "Não foi possível exportar as tarefas.");
@@ -115,25 +64,18 @@ export function ExportTasks() {
                 copyToCacheDirectory: true,
             });
 
-            // compatibilidade com diferentes formatos de retorno
-            if (res.type !== "success") {
+            if (res.canceled === true) {
                 setLoading(false);
                 return;
             }
 
             // Algumas plataformas retornam fileCopyUri, outras uri, outras assets[0].uri
-            const uri =
-                // @ts-ignore possible props
-                (res as any).fileCopyUri ??
-                // @ts-ignore
-                (res as any).uri ??
-                // @ts-ignore
-                (res as any).assets?.[0]?.uri ??
-                null;
+            const uri = res.assets?.[0]?.uri ?? null;
 
             if (!uri) {
                 Alert.alert("Importar", "URI do arquivo não encontrada.");
                 setLoading(false);
+
                 return;
             }
 
@@ -160,9 +102,11 @@ export function ExportTasks() {
                     "Arquivo inválido. Esperado um array de tarefas.",
                 );
                 setLoading(false);
+
                 return;
             }
 
+            // Opções de importação
             Alert.alert(
                 "Importar tarefas",
                 "Deseja mesclar as tarefas do arquivo com as existentes, ou substituir todas as tarefas atuais?",
@@ -194,7 +138,7 @@ export function ExportTasks() {
         }
     }
 
-    // Mesclar: atualiza por id ou adiciona
+    // Atualiza por id ou adiciona
     async function mergeTasks(items: Task[]) {
         try {
             setLoading(true);
@@ -219,7 +163,7 @@ export function ExportTasks() {
         }
     }
 
-    // Substituir: remove todas e adiciona as importadas
+    // Remove todas e adiciona as importadas
     async function replaceTasks(items: Task[]) {
         try {
             setLoading(true);
