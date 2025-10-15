@@ -5,7 +5,7 @@ import { Task } from "../types/Task";
 
 // Terceiros
 import { Text, TouchableOpacity, View } from "react-native";
-import { useTheme } from "../context/ThemeContext";
+import { useSettings } from "../context/SettingsContext";
 import { createStyles } from "../styles/ScreenStyles";
 
 type Props = {
@@ -16,7 +16,7 @@ type Props = {
 };
 
 export default function TaskItem({ task, onToggle, onEdit, onDelete }: Props) {
-    const { theme } = useTheme();
+    const { theme } = useSettings();
     const { TaskStyles } = createStyles(theme);
 
     return (

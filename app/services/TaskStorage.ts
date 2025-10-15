@@ -6,9 +6,12 @@ import { Task } from "../types/Task";
 //Terceiros
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
+import { useSettings } from "../context/SettingsContext";
 
 export function TaskStorage() {
     const STORAGE_KEY = "@tasks_v1";
+
+    const { defaultReminderMinutes } = useSettings();
 
     // Pega todas as tarefas
     async function getAllTasks() {
@@ -74,7 +77,7 @@ export function TaskStorage() {
     }
 
     // Envia notificação
-    async function scheduleReminder(task: Task): Promise<string | null> {
+    async function scheduleReminder(task: Task) {
         try {
             if (!task.dueDate || task.completed) return null;
 
@@ -82,15 +85,17 @@ export function TaskStorage() {
             const now = new Date();
             const diffMs = due.getTime() - now.getTime();
 
-            // Só agenda se ainda não passou e estiver dentro de 7 dias (ajuste conforme desejar)
+            // Só agenda se ainda não passou e estiver dentro de 7 dias
             if (diffMs <= 0 || diffMs > 1000 * 60 * 60 * 24 * 7) return null;
 
-            // Notifica 1 hora antes do vencimento (ou imediatamente se diff pequeno)
+            // Usa o valor defaultReminderMinutes
+            const offsetMs =
+                defaultReminderMinutes !== null
+                    ? defaultReminderMinutes * 60 * 1000
+                    : 60 * 60 * 1000; // fallback: 1h
+
             const triggerDate = new Date(
-                Math.max(
-                    due.getTime() - 1000 * 60 * 60,
-                    now.getTime() + 1000 * 10,
-                ),
+                Math.max(due.getTime() - offsetMs, now.getTime() + 1000 * 10),
             );
 
             const id = await Notifications.scheduleNotificationAsync({

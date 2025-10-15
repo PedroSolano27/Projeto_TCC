@@ -8,7 +8,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
 import { enableScreens } from "react-native-screens";
-import { ThemeProvider } from "./context/ThemeContext";
+import { SettingsProvider } from "./context/SettingsContext";
 
 // Elementos
 import SettingsScreen from "./screens/SettingsScreen";
@@ -55,7 +55,7 @@ export default function App() {
     }, []);
 
     return (
-        <ThemeProvider>
+        <SettingsProvider>
             <Stack.Navigator initialRouteName="List">
                 <Stack.Screen
                     name="List"
@@ -71,6 +71,6 @@ export default function App() {
                     options={{ title: "Opções" }}
                 />
             </Stack.Navigator>
-        </ThemeProvider>
+        </SettingsProvider>
     );
 }

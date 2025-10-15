@@ -9,7 +9,7 @@ import { Task } from "../types/Task";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Notifications from "expo-notifications";
 import { useEffect, useState } from "react";
-import { useTheme } from "../context/ThemeContext";
+import { useSettings } from "../context/SettingsContext";
 import { TaskStorage } from "../services/TaskStorage";
 import { createStyles } from "../styles/ScreenStyles";
 
@@ -20,13 +20,14 @@ import TaskItem from "../components/TaskItem";
 type Props = NativeStackScreenProps<RootStackParamList, "List">;
 
 export default function TaskListScreen({ navigation }: Props) {
-    const { theme } = useTheme();
+    const { theme, taskFilter } = useSettings();
     const { getAllTasks, updateTask, removeTask } = TaskStorage();
+
     const { TaskListStyles } = createStyles(theme);
 
     const [tasks, setTasks] = useState<Task[]>([]);
     const [filter, setFilter] = useState<"all" | "completed" | "pending">(
-        "pending",
+        taskFilter,
     );
 
     // Filtra as tarefas
@@ -90,6 +91,10 @@ export default function TaskListScreen({ navigation }: Props) {
         return unsubscribe;
     }, [navigation]);
 
+    useEffect(() => {
+        setFilter(taskFilter);
+    }, [taskFilter]);
+
     return (
         <View style={TaskListStyles.container}>
             <View style={TaskListStyles.header}>
@@ -122,16 +127,6 @@ export default function TaskListScreen({ navigation }: Props) {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={() => setFilter("pending")}
-                    style={[
-                        TaskListStyles.filterBtn,
-                        filter === "pending" && TaskListStyles.filterActive,
-                    ]}
-                >
-                    <Text style={TaskListStyles.filterText}>Pendentes</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
                     onPress={() => setFilter("completed")}
                     style={[
                         TaskListStyles.filterBtn,
@@ -139,6 +134,16 @@ export default function TaskListScreen({ navigation }: Props) {
                     ]}
                 >
                     <Text style={TaskListStyles.filterText}>Concluídas</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={() => setFilter("pending")}
+                    style={[
+                        TaskListStyles.filterBtn,
+                        filter === "pending" && TaskListStyles.filterActive,
+                    ]}
+                >
+                    <Text style={TaskListStyles.filterText}>Pendentes</Text>
                 </TouchableOpacity>
             </View>
 

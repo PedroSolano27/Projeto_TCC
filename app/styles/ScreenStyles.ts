@@ -6,19 +6,21 @@ export const createStyles = (theme: Theme) => {
     const isDark = theme === "dark";
 
     const colors = {
-        background: isDark ? "#121212" : "#ffffff",
-        surface: isDark ? "#1e1e1e" : "#ffffff",
-        textPrimary: isDark ? "#eeeeee" : "#222222",
-        textSecondary: isDark ? "#bdbdbd" : "#666666",
-        border: isDark ? "#2a2a2a" : "#e6e6e6",
         accent: "#0984e3",
-        success: "#27ae60",
         danger: "#e74c3c",
-        filterBg: isDark ? "#2a2a2a" : "#eeeeee",
-        filterActive: "#0984e3",
+        success: "#27ae60",
         addBtnBg: "#0984e3",
         saveBtnBg: "#27ae60",
+        filterActive: "#0984e3",
         saveBtnDisabledBg: "#9bd6a6",
+        inputBg: isDark ? "#1e272e" : "#fff",
+        cardBg: isDark ? "#2d3436" : "#f1f2f6",
+        border: isDark ? "#2a2a2a" : "#e6e6e6",
+        surface: isDark ? "#1e1e1e" : "#ffffff",
+        filterBg: isDark ? "#2a2a2a" : "#eeeeee",
+        background: isDark ? "#121212" : "#ffffff",
+        textPrimary: isDark ? "#eeeeee" : "#222222",
+        textSecondary: isDark ? "#bdbdbd" : "#666666",
     };
 
     return {
@@ -120,14 +122,24 @@ export const createStyles = (theme: Theme) => {
         SettingsStyles: StyleSheet.create({
             container: {
                 flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
+                paddingHorizontal: 24,
+                paddingVertical: 32,
                 backgroundColor: colors.background,
+            },
+            row: {
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 24,
+            },
+            section: {
+                marginBottom: 32,
             },
             label: {
                 fontSize: 18,
                 marginBottom: 12,
                 color: colors.textPrimary,
+                fontWeight: "600",
             },
             button: {
                 backgroundColor: colors.addBtnBg,
@@ -143,6 +155,50 @@ export const createStyles = (theme: Theme) => {
             buttonText: {
                 color: colors.textPrimary,
                 fontWeight: "600",
+            },
+            smallButton: {
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                marginLeft: 12,
+            },
+            filterRow: {
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginTop: 8,
+            },
+            filterButton: {
+                flex: 1,
+                paddingVertical: 10,
+                marginHorizontal: 4,
+                borderRadius: 6,
+                backgroundColor: colors.cardBg,
+                alignItems: "center",
+            },
+            filterButtonActive: {
+                backgroundColor: colors.accent,
+            },
+            filterText: {
+                color: colors.textSecondary,
+                fontWeight: "500",
+            },
+            filterTextActive: {
+                color: colors.textPrimary,
+                fontWeight: "700",
+            },
+            reminderRow: {
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 8,
+            },
+            input: {
+                flex: 1,
+                borderWidth: 1,
+                borderColor: colors.border,
+                borderRadius: 6,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                color: colors.textPrimary,
+                backgroundColor: colors.inputBg,
             },
         }),
 

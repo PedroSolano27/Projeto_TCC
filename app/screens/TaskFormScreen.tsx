@@ -9,7 +9,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
-import { useTheme } from "../context/ThemeContext";
+import { useSettings } from "../context/SettingsContext";
 import { TaskStorage } from "../services/TaskStorage";
 import { createStyles } from "../styles/ScreenStyles";
 
@@ -28,7 +28,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "Form">;
 
 export default function TaskFormScreen({ route, navigation }: Props) {
     const { addTask, updateTask } = TaskStorage();
-    const { theme } = useTheme();
+    const { theme } = useSettings();
     const { TaskFormStyles } = createStyles(theme);
 
     // Pega uma Task se ela já existe
