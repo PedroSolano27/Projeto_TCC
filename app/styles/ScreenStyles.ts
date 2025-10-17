@@ -235,5 +235,93 @@ export const createStyles = (theme: Theme) => {
             actionBtn: { marginLeft: 8, padding: 8 },
             actionText: { color: colors.accent },
         }),
+
+        GamificationStyles: StyleSheet.create({
+            // XpBar
+            xpContainer: {
+                width: "100%",
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+                backgroundColor: colors.surface,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: colors.border,
+                marginBottom: 12,
+            },
+            xpRow: {
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+            },
+            xpLevelText: {
+                fontSize: 14,
+                fontWeight: "700",
+                color: colors.textPrimary,
+            },
+            xpText: {
+                fontSize: 12,
+                color: colors.textSecondary,
+            },
+            xpBarWrap: {
+                marginTop: 8,
+                height: 10,
+                borderRadius: 8,
+                backgroundColor: colors.cardBg,
+                overflow: "hidden",
+            },
+            xpBarFill: {
+                height: "100%",
+                backgroundColor: colors.accent,
+                borderRadius: 8,
+            },
+
+            // LevelUp modal container
+            levelModalOverlay: {
+                flex: 1,
+                backgroundColor: "rgba(0,0,0,0.5)",
+                justifyContent: "center",
+                alignItems: "center",
+                paddingHorizontal: 20,
+            },
+            levelModalCard: {
+                width: "100%",
+                maxWidth: 360,
+                backgroundColor: colors.surface,
+                borderRadius: 12,
+                padding: 20,
+                borderWidth: 1,
+                borderColor: colors.border,
+                alignItems: "center",
+            },
+            levelModalTitle: {
+                fontSize: 20,
+                fontWeight: "800",
+                color: colors.textPrimary,
+                marginBottom: 8,
+            },
+            levelModalSubtitle: {
+                fontSize: 16,
+                color: colors.textSecondary,
+                marginBottom: 16,
+                textAlign: "center",
+            },
+            levelRewardText: {
+                fontSize: 14,
+                color: colors.textPrimary,
+                marginBottom: 16,
+            },
+            levelModalBtn: {
+                backgroundColor: colors.accent,
+                paddingHorizontal: 16,
+                paddingVertical: 10,
+                borderRadius: 8,
+                alignSelf: "stretch",
+            },
+            levelModalBtnText: {
+                color: "#fff",
+                fontWeight: "700",
+                textAlign: "center",
+            },
+        }),
     };
 };

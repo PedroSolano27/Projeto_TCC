@@ -5,8 +5,12 @@ import { Task } from "../types/Task";
 
 //Terceiros
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import EventEmitter from "events";
 import * as Notifications from "expo-notifications";
 import { useSettings } from "../context/SettingsContext";
+import { applyCompletionRewards } from "./Gamification";
+
+export const gamificationEvents = new EventEmitter();
 
 export function TaskStorage() {
     const STORAGE_KEY = "@tasks_v1";
@@ -40,6 +44,50 @@ export function TaskStorage() {
         await saveAllTasks(tasks);
     }
 
+    // Marca como concluída (helper)
+    async function completeTask(taskId: string) {
+        const tasks = await getAllTasks();
+        const idx = tasks.findIndex((t) => t.id === taskId);
+        if (idx === -1) return;
+
+        const original = tasks[idx];
+        if (original.completed) return; // já concluída
+
+        const updated: Task = {
+            ...original,
+            completed: true,
+            completedAt: new Date().toISOString(),
+        };
+
+        // Cancela notificação se houver
+        if (original.notificationId) {
+            await cancelReminder(original.notificationId);
+        }
+
+        // Persiste mudança
+        tasks[idx] = updated;
+        await saveAllTasks(tasks);
+
+        // Aplica recompensas de gamificação
+        try {
+            const result = await applyCompletionRewards(updated);
+            if (result?.leveledUp) {
+                gamificationEvents.emit("levelup", {
+                    level: result.profile.level,
+                    coins: result.profile.coins,
+                });
+            }
+            if (result?.points) {
+                gamificationEvents.emit("pointsEarned", {
+                    points: result.points,
+                    xp: result.xpGain,
+                });
+            }
+        } catch (err) {
+            console.warn("Erro ao aplicar recompensas", err);
+        }
+    }
+
     // Atualiza Tarefa
     async function updateTask(updated: Task) {
         const tasks = await getAllTasks();
@@ -50,17 +98,44 @@ export function TaskStorage() {
             await cancelReminder(tasks[idx].notificationId);
         }
 
-        // (re)agenda se aplicável
-        const notificationId = await scheduleReminder(updated);
+        // (re)agenda se aplicável (somente se não estiver concluída)
+        let notificationId = null;
+        if (!updated.completed) {
+            notificationId = await scheduleReminder(updated);
+        }
+
         const newTask = { ...updated, notificationId: notificationId ?? null };
 
         if (idx !== -1) {
+            const wasCompleted = tasks[idx].completed;
             tasks[idx] = newTask;
-        } else {
-            tasks.unshift(newTask);
-        }
+            await saveAllTasks(tasks);
 
-        await saveAllTasks(tasks);
+            // Se passou de não concluída para concluída via updateTask, aplicar recompensas
+            if (!wasCompleted && newTask.completed) {
+                try {
+                    const result = await applyCompletionRewards(newTask);
+                    if (result?.leveledUp) {
+                        gamificationEvents.emit("levelup", {
+                            level: result.profile.level,
+                            coins: result.profile.coins,
+                        });
+                    }
+                    if (result?.points) {
+                        gamificationEvents.emit("pointsEarned", {
+                            points: result.points,
+                            xp: result.xpGain,
+                        });
+                    }
+                } catch (err) {
+                    console.warn("Erro ao aplicar recompensas", err);
+                }
+            }
+        } else {
+            // inserir nova
+            tasks.unshift(newTask);
+            await saveAllTasks(tasks);
+        }
     }
 
     // Remove Tarefa
@@ -138,5 +213,6 @@ export function TaskStorage() {
         removeTask,
         scheduleReminder,
         cancelReminder,
+        completeTask,
     };
 }
