@@ -15,6 +15,129 @@ function todayString() {
     return new Date().toISOString().slice(0, 10);
 }
 
+// Define badges disponíveis e suas condições
+function checkBadges(profile: {
+    badges: Badge[];
+    streak: number;
+    level: number;
+    points: number;
+}): Badge[] {
+    const newBadges: Badge[] = [];
+
+    // First Task
+    if (!profile.badges.some((b) => b.id === "first-task")) {
+        newBadges.push({
+            id: "first-task",
+            title: "Primeiro Passo",
+            description: "Concluiu a primeira tarefa",
+            awardedAt: new Date().toISOString(),
+        });
+    }
+
+    // 7-Day Streak
+    if (
+        !profile.badges.some((b) => b.id === "7-day-streak") &&
+        profile.streak >= 7
+    ) {
+        newBadges.push({
+            id: "7-day-streak",
+            title: "Uma Semana Incrível",
+            description: "Concluiu tarefas por 7 dias consecutivos",
+            awardedAt: new Date().toISOString(),
+        });
+    }
+
+    // 30-Day Streak
+    if (
+        !profile.badges.some((b) => b.id === "30-day-streak") &&
+        profile.streak >= 30
+    ) {
+        newBadges.push({
+            id: "30-day-streak",
+            title: "Um Mês de Consistência",
+            description: "Concluiu tarefas por 30 dias consecutivos",
+            awardedAt: new Date().toISOString(),
+        });
+    }
+
+    // Level 5
+    if (!profile.badges.some((b) => b.id === "level-5") && profile.level >= 5) {
+        newBadges.push({
+            id: "level-5",
+            title: "Ascensão",
+            description: "Atingiu o nível 5",
+            awardedAt: new Date().toISOString(),
+        });
+    }
+
+    // Level 10
+    if (
+        !profile.badges.some((b) => b.id === "level-10") &&
+        profile.level >= 10
+    ) {
+        newBadges.push({
+            id: "level-10",
+            title: "Mestre",
+            description: "Atingiu o nível 10",
+            awardedAt: new Date().toISOString(),
+        });
+    }
+
+    // Level 20
+    if (
+        !profile.badges.some((b) => b.id === "level-20") &&
+        profile.level >= 20
+    ) {
+        newBadges.push({
+            id: "level-20",
+            title: "Lenda",
+            description: "Atingiu o nível 20",
+            awardedAt: new Date().toISOString(),
+        });
+    }
+
+    // 100 Points
+    if (
+        !profile.badges.some((b) => b.id === "100-points") &&
+        profile.points >= 100
+    ) {
+        newBadges.push({
+            id: "100-points",
+            title: "Centenário",
+            description: "Acumulou 100 pontos",
+            awardedAt: new Date().toISOString(),
+        });
+    }
+
+    // 500 Points
+    if (
+        !profile.badges.some((b) => b.id === "500-points") &&
+        profile.points >= 500
+    ) {
+        newBadges.push({
+            id: "500-points",
+            title: "Destaque",
+            description: "Acumulou 500 pontos",
+            awardedAt: new Date().toISOString(),
+        });
+    }
+
+    // 1000 Points
+    if (
+        !profile.badges.some((b) => b.id === "1000-points") &&
+        profile.points >= 1000
+    ) {
+        newBadges.push({
+            id: "1000-points",
+            title: "Produtividade Extrema",
+            description: "Acumulou 1000 pontos",
+            awardedAt: new Date().toISOString(),
+        });
+    }
+
+    return newBadges;
+}
+
 // Aplica recompensas de completar tarefas
 export async function applyCompletionRewards(
     task: Task,
@@ -63,29 +186,8 @@ export async function applyCompletionRewards(
     profile.streak = newStreak;
     profile.lastCompletionDate = today;
 
-    // Badges simples
-    const newBadges: Badge[] = [];
-    if (!profile.badges.some((b) => b.id === "first-task")) {
-        newBadges.push({
-            id: "first-task",
-            title: "Primeira tarefa",
-            description: "Concluiu a primeira tarefa",
-            awardedAt: new Date().toISOString(),
-        });
-    }
-
-    if (
-        !profile.badges.some((b) => b.id === "7-day-streak") &&
-        profile.streak >= 7
-    ) {
-        newBadges.push({
-            id: "7-day-streak",
-            title: "7 dias seguidos",
-            description: "Concluiu tarefas por 7 dias consecutivos",
-            awardedAt: new Date().toISOString(),
-        });
-    }
-
+    // Verifica novas badges
+    const newBadges = checkBadges(profile);
     if (newBadges.length) {
         profile.badges = [...(profile.badges ?? []), ...newBadges];
     }

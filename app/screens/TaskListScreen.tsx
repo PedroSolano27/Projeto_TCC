@@ -101,6 +101,13 @@ export default function TaskListScreen({ navigation }: Props) {
                 <Text style={TaskListStyles.title}>Minhas Tarefas</Text>
 
                 <TouchableOpacity
+                    onPress={() => navigation.navigate("Dashboard")}
+                    style={TaskListStyles.addBtn}
+                >
+                    <Text style={TaskListStyles.addText}>Progresso</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
                     onPress={() => navigation.navigate("Settings")}
                     style={TaskListStyles.addBtn}
                 >

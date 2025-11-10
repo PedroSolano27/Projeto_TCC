@@ -11,6 +11,7 @@ import { enableScreens } from "react-native-screens";
 import { SettingsProvider } from "./context/SettingsContext";
 
 // Elementos
+import DashboardScreen from "./screens/DashboardScreen";
 import SettingsScreen from "./screens/SettingsScreen";
 import TaskFormScreen from "./screens/TaskFormScreen";
 import TaskListScreen from "./screens/TaskListScreen";
@@ -61,6 +62,12 @@ export default function App() {
                     name="List"
                     component={TaskListScreen}
                     options={{ title: "Tarefas" }}
+                />
+
+                <Stack.Screen
+                    name="Dashboard"
+                    component={DashboardScreen}
+                    options={{ title: "Progresso" }}
                 />
 
                 <Stack.Screen name="Form" component={TaskFormScreen} />

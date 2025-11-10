@@ -1,0 +1,38 @@
+A mobile application focused on personal productivity and gamification. The app includes the following features:
+
+Task Management
+
+    - Add, edit, and delete tasks.
+    - Categorize tasks and assign due dates.
+    - Simple, intuitive interface for quick task entry.
+
+Gamification System
+
+    - Award points for each completed task.
+    - Levels and progression based on accumulated points.
+    - Unlockable achievements and symbolic rewards.
+    - Visual and animated feedback when tasks are completed.
+
+Progress Dashboard
+
+    - Display statistics on productivity (tasks completed, pending, streaks).
+    - Show current level, points, and unlocked achievements.
+    - Historical view of past tasks and performance.
+
+Notifications & Reminders
+
+    - Smart reminders based on user behavior.
+    - Push notifications for upcoming deadlines.
+    - Motivational messages tied to gamification progress.
+
+User Experience & Design
+
+    - Clean, responsive interface with reusable components.
+    - Intuitive icons, soft colors, and motivational visuals.
+    - Offline functionality with local data persistence.
+
+Technical Requirements
+
+    - Built with React Native for cross-platform support (Android/iOS).
+    - Use AsyncStorage for local data persistence.
+    - Modular architecture separating UI, business logic, and data storage.

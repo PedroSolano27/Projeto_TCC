@@ -9,6 +9,11 @@ import EventEmitter from "events";
 import * as Notifications from "expo-notifications";
 import { useSettings } from "../context/SettingsContext";
 import { applyCompletionRewards } from "./Gamification";
+import {
+    notifyBadgeUnlocked,
+    notifyLevelUp,
+    notifyStreakMilestone,
+} from "./MotivationalNotifications";
 
 export const gamificationEvents = new EventEmitter();
 
@@ -76,12 +81,24 @@ export function TaskStorage() {
                     level: result.profile.level,
                     coins: result.profile.coins,
                 });
+                // Envia notificação de level up
+                await notifyLevelUp(result.profile.level, result.profile.coins);
             }
             if (result?.points) {
                 gamificationEvents.emit("pointsEarned", {
                     points: result.points,
                     xp: result.xpGain,
                 });
+            }
+            // Notifica sobre novos badges
+            if (result?.newBadges && result.newBadges.length > 0) {
+                for (const badge of result.newBadges) {
+                    await notifyBadgeUnlocked(badge.title, badge.description);
+                }
+            }
+            // Notifica sobre streak milestones
+            if (result?.profile.streak === 7 || result?.profile.streak === 30) {
+                await notifyStreakMilestone(result.profile.streak);
             }
         } catch (err) {
             console.warn("Erro ao aplicar recompensas", err);
