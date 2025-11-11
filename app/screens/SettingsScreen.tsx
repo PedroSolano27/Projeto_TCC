@@ -1,11 +1,7 @@
-import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
-    Alert,
-    Keyboard,
     Switch,
     Text,
-    TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
@@ -19,8 +15,6 @@ export default function SettingsScreen() {
         toggleTheme,
         taskFilter,
         setTaskFilter,
-        defaultReminderMinutes,
-        setDefaultReminderMinutes,
         loading: settingsLoading,
     } = useSettings();
 
@@ -28,58 +22,7 @@ export default function SettingsScreen() {
     const { exportTasks, importTasks, loading: ioLoading } = ExportTasks();
 
     const isDark = theme === "dark";
-    const [localReminder, setLocalReminder] = useState<string>(
-        defaultReminderMinutes === null ? "" : String(defaultReminderMinutes),
-    );
-    const [savingReminder, setSavingReminder] = useState(false);
-
-    useEffect(() => {
-        setLocalReminder(
-            defaultReminderMinutes === null
-                ? ""
-                : String(defaultReminderMinutes),
-        );
-    }, [defaultReminderMinutes]);
-
-    const applyReminder = async () => {
-        Keyboard.dismiss();
-        setSavingReminder(true);
-
-        try {
-            if (localReminder.trim() === "") {
-                setDefaultReminderMinutes(null);
-                Alert.alert(
-                    "Configurações",
-                    "Lembrete padrão removido (nenhum).",
-                );
-                return;
-            }
-
-            const value = Number(localReminder);
-
-            if (!Number.isFinite(value) || value < 0) {
-                Alert.alert(
-                    "Valor inválido",
-                    "Informe um número inteiro maior ou igual a 0.",
-                );
-                return;
-            }
-
-            setDefaultReminderMinutes(Math.floor(value));
-
-            Alert.alert(
-                "Configurações",
-                `Lembrete padrão salvo: ${Math.floor(value)} minutos.`,
-            );
-        } catch (err) {
-            console.warn("Erro ao salvar lembrete", err);
-            Alert.alert("Erro", "Não foi possível salvar o lembrete padrão.");
-        } finally {
-            setSavingReminder(false);
-        }
-    };
-
-    const anyLoading = settingsLoading || ioLoading || savingReminder;
+    const anyLoading = settingsLoading || ioLoading;
 
     return (
         <View style={[SettingsStyles.container]}>
@@ -154,42 +97,6 @@ export default function SettingsScreen() {
                         >
                             Pendentes
                         </Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-            <View style={SettingsStyles.section}>
-                <Text style={SettingsStyles.label}>
-                    Lembrete padrão (minutos)
-                </Text>
-
-                <View style={SettingsStyles.reminderRow}>
-                    <TextInput
-                        style={SettingsStyles.input}
-                        keyboardType="number-pad"
-                        value={localReminder}
-                        onChangeText={setLocalReminder}
-                        placeholder="Ex: 60"
-                        placeholderTextColor={isDark ? "#bbb" : "#666"}
-                        editable={!anyLoading}
-                        returnKeyType="done"
-                        onSubmitEditing={applyReminder}
-                    />
-                    <TouchableOpacity
-                        style={[
-                            SettingsStyles.button,
-                            SettingsStyles.smallButton,
-                        ]}
-                        onPress={applyReminder}
-                        disabled={anyLoading}
-                    >
-                        {savingReminder ? (
-                            <ActivityIndicator color="#fff" />
-                        ) : (
-                            <Text style={SettingsStyles.buttonText}>
-                                Salvar
-                            </Text>
-                        )}
                     </TouchableOpacity>
                 </View>
             </View>

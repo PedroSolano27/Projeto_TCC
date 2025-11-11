@@ -160,6 +160,8 @@ export function TaskStorage() {
         const notificationIds: string[] = [];
 
         try {
+            // Validate preconditions for scheduling notifications
+            // Tasks must have: due date, not be completed, and have selected notification times
             if (!task.dueDate || task.completed || !task.notificationIds) {
                 return [];
             }
@@ -168,22 +170,27 @@ export function TaskStorage() {
             const now = new Date();
             const diffMs = due.getTime() - now.getTime();
 
+            // Only schedule if deadline is in the future and within 7 days
+            // Prevents scheduling for past dates or too-far-future dates
             if (diffMs <= 0 || diffMs > 1000 * 60 * 60 * 24 * 7) {
                 return [];
             }
 
+            // Schedule notification for each selected time
+            // Times map to hours before deadline (e.g., "1h" = 1 hour before)
             for (const timeId of task.notificationIds) {
                 const hours =
                     NOTIFICATION_HOURS[
                         timeId as keyof typeof NOTIFICATION_HOURS
                     ];
-                if (!hours) continue;
+                if (!hours) continue; // Skip unknown time identifiers
 
+                // Calculate trigger date: deadline minus the selected hours
                 const offsetMs = hours * 60 * 60 * 1000;
                 const triggerDate = new Date(
                     Math.max(
                         due.getTime() - offsetMs,
-                        now.getTime() + 1000 * 10,
+                        now.getTime() + 1000 * 10, // Ensure at least 10 seconds in future
                     ),
                 );
 
@@ -202,11 +209,13 @@ export function TaskStorage() {
                     });
                     notificationIds.push(id);
                 } catch {
-                    // Continue with next notification time
+                    // Continue with next notification time if this one fails
+                    // Ensures partial success doesn't prevent other notifications
                 }
             }
         } catch {
-            // Return whatever notifications were scheduled
+            // Return whatever notifications were successfully scheduled
+            // Even if a validation error occurs mid-process
         }
 
         return notificationIds;

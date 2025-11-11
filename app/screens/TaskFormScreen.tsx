@@ -42,8 +42,10 @@ export default function TaskFormScreen({ route, navigation }: Props) {
     const [selectedTag, setSelectedTag] = useState<string>(
         existing?.selectedTag || DEFAULT_TAG,
     );
+    // Initialize notification times with existing values or empty array
+    // This ensures user-selected notification preferences persist when editing
     const [selectedTimes, setSelectedTimes] = useState<string[]>(
-        existing?.notificationIds ? ["1h"] : [],
+        existing?.notificationIds || [],
     );
 
     useEffect(() => {

@@ -15,7 +15,6 @@ type TaskFilter = "all" | "completed" | "pending";
 type Settings = {
     theme: Theme;
     taskFilter: TaskFilter;
-    defaultReminderMinutes: number | null;
 };
 
 type SettingsContextType = Settings & {
@@ -23,7 +22,6 @@ type SettingsContextType = Settings & {
     toggleTheme: () => void;
     setTheme: (t: Theme) => void;
     setTaskFilter: (f: TaskFilter) => void;
-    setDefaultReminderMinutes: (m: number | null) => void;
     resetSettings: () => void;
 };
 
@@ -32,7 +30,6 @@ const STORAGE_KEY = "@app_settings_v1";
 const defaults: Settings = {
     theme: (Appearance.getColorScheme() ?? "light") as Theme,
     taskFilter: "all",
-    defaultReminderMinutes: 60,
 };
 
 const SettingsContext = createContext<SettingsContextType>({
@@ -41,7 +38,6 @@ const SettingsContext = createContext<SettingsContextType>({
     toggleTheme: () => {},
     setTheme: () => {},
     setTaskFilter: () => {},
-    setDefaultReminderMinutes: () => {},
     resetSettings: () => {},
 });
 
@@ -53,10 +49,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     const [taskFilter, setTaskFilterState] = useState<TaskFilter>(
         defaults.taskFilter,
     );
-    const [defaultReminderMinutes, setDefaultReminderMinutesState] = useState<
-        number | null
-    >(defaults.defaultReminderMinutes);
 
+    // Load settings from async storage on app initialization
     useEffect(() => {
         let mounted = true;
         const loadSettings = async () => {
@@ -64,6 +58,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                 const raw = await AsyncStorage.getItem(STORAGE_KEY);
 
                 if (!raw) {
+                    // First time setup: save default settings
                     await AsyncStorage.setItem(
                         STORAGE_KEY,
                         JSON.stringify(defaults),
@@ -73,11 +68,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
                     setThemeState(defaults.theme);
                     setTaskFilterState(defaults.taskFilter);
-                    setDefaultReminderMinutesState(
-                        defaults.defaultReminderMinutes,
-                    );
                 }
 
+                // Load existing settings from storage
                 if (raw) {
                     const parsed = JSON.parse(raw) as Partial<Settings>;
 
@@ -86,10 +79,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                     if (parsed.theme) setThemeState(parsed.theme);
                     if (parsed.taskFilter)
                         setTaskFilterState(parsed.taskFilter);
-                    if (typeof parsed.defaultReminderMinutes !== "undefined")
-                        setDefaultReminderMinutesState(
-                            parsed.defaultReminderMinutes,
-                        );
                 }
             } catch (err) {
                 console.warn("Erro ao carregar settings", err);
@@ -105,13 +94,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         };
     }, []);
 
+    // Persist settings to async storage
     const persist = useCallback(
         async (next: Partial<Settings>) => {
             try {
                 const current: Settings = {
                     theme,
                     taskFilter,
-                    defaultReminderMinutes,
                 };
                 const merged: Settings = { ...current, ...next };
 
@@ -120,7 +109,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                 console.warn("Erro ao persistir settings", err);
             }
         },
-        [theme, taskFilter, defaultReminderMinutes],
+        [theme, taskFilter],
     );
 
     const toggleTheme = useCallback(() => {
@@ -145,20 +134,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         [persist],
     );
 
-    const setDefaultReminderMinutes = useCallback(
-        (m: number | null) => {
-            setDefaultReminderMinutesState(m);
-            persist({ defaultReminderMinutes: m });
-        },
-        [persist],
-    );
-
     const resetSettings = useCallback(async () => {
         try {
             setLoading(true);
             setThemeState(defaults.theme);
             setTaskFilterState(defaults.taskFilter);
-            setDefaultReminderMinutesState(defaults.defaultReminderMinutes);
 
             await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
         } catch (err) {
@@ -173,12 +153,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
             value={{
                 theme,
                 taskFilter,
-                defaultReminderMinutes,
                 loading,
                 toggleTheme,
                 setTheme,
                 setTaskFilter,
-                setDefaultReminderMinutes,
                 resetSettings,
             }}
         >
