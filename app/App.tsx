@@ -1,27 +1,18 @@
-// App principal
-
-// Tipos
-import { RootStackParamList } from "./types/StackParamList";
-
-// Terceiros
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
 import { enableScreens } from "react-native-screens";
 import { SettingsProvider } from "./context/SettingsContext";
-
-// Elementos
 import DashboardScreen from "./screens/DashboardScreen";
 import SettingsScreen from "./screens/SettingsScreen";
 import TaskFormScreen from "./screens/TaskFormScreen";
 import TaskListScreen from "./screens/TaskListScreen";
+import { RootStackParamList } from "./types/StackParamList";
 
 enableScreens();
 
-// Cria a pilha
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-// Configura notificações
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
         shouldShowAlert: true,
@@ -33,9 +24,8 @@ Notifications.setNotificationHandler({
 });
 
 export default function App() {
-    // Inicia notificações
     useEffect(() => {
-        async function init() {
+        const initNotifications = async () => {
             const { status: existingStatus } =
                 await Notifications.getPermissionsAsync();
 
@@ -50,9 +40,9 @@ export default function App() {
             if (finalStatus !== "granted") {
                 console.warn("Permissão de notificação não concedida");
             }
-        }
+        };
 
-        init();
+        initNotifications();
     }, []);
 
     return (

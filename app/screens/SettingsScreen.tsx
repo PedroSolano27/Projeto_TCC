@@ -1,6 +1,3 @@
-// Tela de opções
-
-// Terceiros
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -36,7 +33,6 @@ export default function SettingsScreen() {
     );
     const [savingReminder, setSavingReminder] = useState(false);
 
-    // Define setLocalReminder toda vez que ele muda
     useEffect(() => {
         setLocalReminder(
             defaultReminderMinutes === null
@@ -45,8 +41,7 @@ export default function SettingsScreen() {
         );
     }, [defaultReminderMinutes]);
 
-    // Valida e salva lembrete padrão (null = sem lembrete)
-    async function applyReminder() {
+    const applyReminder = async () => {
         Keyboard.dismiss();
         setSavingReminder(true);
 
@@ -57,13 +52,12 @@ export default function SettingsScreen() {
                     "Configurações",
                     "Lembrete padrão removido (nenhum).",
                 );
-
                 return;
             }
 
-            const n = Number(localReminder);
+            const value = Number(localReminder);
 
-            if (!Number.isFinite(n) || n < 0) {
+            if (!Number.isFinite(value) || value < 0) {
                 Alert.alert(
                     "Valor inválido",
                     "Informe um número inteiro maior ou igual a 0.",
@@ -71,11 +65,11 @@ export default function SettingsScreen() {
                 return;
             }
 
-            setDefaultReminderMinutes(Math.floor(n));
+            setDefaultReminderMinutes(Math.floor(value));
 
             Alert.alert(
                 "Configurações",
-                `Lembrete padrão salvo: ${Math.floor(n)} minutos.`,
+                `Lembrete padrão salvo: ${Math.floor(value)} minutos.`,
             );
         } catch (err) {
             console.warn("Erro ao salvar lembrete", err);
@@ -83,7 +77,7 @@ export default function SettingsScreen() {
         } finally {
             setSavingReminder(false);
         }
-    }
+    };
 
     const anyLoading = settingsLoading || ioLoading || savingReminder;
 
@@ -175,7 +169,7 @@ export default function SettingsScreen() {
                         keyboardType="number-pad"
                         value={localReminder}
                         onChangeText={setLocalReminder}
-                        placeholder="Ex: 60 (deixe vazio para nenhum)"
+                        placeholder="Ex: 60"
                         placeholderTextColor={isDark ? "#bbb" : "#666"}
                         editable={!anyLoading}
                         returnKeyType="done"

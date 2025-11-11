@@ -1,11 +1,6 @@
-// Componente de modal de nível
-
-// Terceiros
+import { Modal, Text, TouchableOpacity, View } from "react-native";
 import { useSettings } from "../context/SettingsContext";
 import { createStyles } from "../styles/ScreenStyles";
-
-// Elementos
-import { Modal, Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
     visible: boolean;
@@ -30,16 +25,16 @@ export default function LevelUpModal({
                     <Text style={GamificationStyles.levelModalTitle}>
                         Parabéns!
                     </Text>
-                    
-                    <Text
-                        style={GamificationStyles.levelModalSubtitle}
-                    >{`Você subiu para o nível ${level}.`}</Text>
 
-                    {typeof rewardCoins === "number" ? (
-                        <Text
-                            style={GamificationStyles.levelRewardText}
-                        >{`Recebeu ${rewardCoins} moedas.`}</Text>
-                    ) : null}
+                    <Text style={GamificationStyles.levelModalSubtitle}>
+                        {`Você subiu para o nível ${level}.`}
+                    </Text>
+
+                    {typeof rewardCoins === "number" && (
+                        <Text style={GamificationStyles.levelRewardText}>
+                            {`Recebeu ${rewardCoins} moedas.`}
+                        </Text>
+                    )}
 
                     <TouchableOpacity
                         style={GamificationStyles.levelModalBtn}

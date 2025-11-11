@@ -1,12 +1,7 @@
-// Componente de Tarefa
-
-// Tipos
-import { Task } from "../types/Task";
-
-// Terceiros
 import { Text, TouchableOpacity, View } from "react-native";
 import { useSettings } from "../context/SettingsContext";
 import { createStyles } from "../styles/ScreenStyles";
+import { Task } from "../types/Task";
 
 type Props = {
     task: Task;

@@ -1,28 +1,19 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-// Tela de Lista de Tarefas
-
-// Tipos
-import { RootStackParamList } from "../types/StackParamList";
-import { Task } from "../types/Task";
-
-// Terceiros
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Notifications from "expo-notifications";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
+import TaskItem from "../components/TaskItem";
 import { useSettings } from "../context/SettingsContext";
 import { TaskStorage } from "../services/TaskStorage";
 import { createStyles } from "../styles/ScreenStyles";
-
-// Elementos
-import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
-import TaskItem from "../components/TaskItem";
+import { RootStackParamList } from "../types/StackParamList";
+import { Task } from "../types/Task";
 
 type Props = NativeStackScreenProps<RootStackParamList, "List">;
 
 export default function TaskListScreen({ navigation }: Props) {
     const { theme, taskFilter } = useSettings();
     const { getAllTasks, updateTask, removeTask } = TaskStorage();
-
     const { TaskListStyles } = createStyles(theme);
 
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -30,42 +21,39 @@ export default function TaskListScreen({ navigation }: Props) {
         taskFilter,
     );
 
-    // Filtra as tarefas
     const filteredTasks = tasks.filter((task) => {
         if (filter === "completed") return task.completed;
         if (filter === "pending") return !task.completed;
-
-        return true; // 'all'
+        return true;
     });
 
-    // Carrega tarefas
-    async function load() {
-        const all = await getAllTasks();
-        setTasks(all);
-    }
+    const loadTasks = useCallback(async () => {
+        const allTasks = await getAllTasks();
+        setTasks(allTasks);
+    }, [getAllTasks]);
 
-    // Atualiza estado de uma tarefa
-    async function toggle(id: string) {
-        const t = tasks.find((x) => x.id === id);
-        if (!t) return;
+    const toggleTask = async (id: string) => {
+        const task = tasks.find((x) => x.id === id);
+        if (!task) return;
 
-        const updated = { ...t, completed: !t.completed };
+        const updated = { ...task, completed: !task.completed };
 
-        if (updated.completed && t.notificationId) {
-            // Cancela notificação
-            await Notifications.cancelScheduledNotificationAsync(
-                t.notificationId,
-            );
-            updated.notificationId = null;
+        if (updated.completed && task.notificationIds) {
+            for (const notId of task.notificationIds) {
+                try {
+                    await Notifications.cancelScheduledNotificationAsync(notId);
+                } catch {
+                    continue;
+                }
+            }
+            updated.notificationIds = undefined;
         }
 
         await updateTask(updated);
+        loadTasks();
+    };
 
-        load();
-    }
-
-    // Remove uma tarefa
-    async function del(id: string) {
+    const deleteTask = (id: string) => {
         Alert.alert(
             "Confirmar",
             "Tem certeza que deseja excluir esta tarefa?",
@@ -76,20 +64,22 @@ export default function TaskListScreen({ navigation }: Props) {
                     style: "destructive",
                     onPress: async () => {
                         await removeTask(id);
-                        load();
+                        loadTasks();
                     },
                 },
             ],
             { cancelable: true },
         );
-    }
+    };
 
     useEffect(() => {
-        const unsubscribe = navigation.addListener("focus", load);
-        load();
+        loadTasks();
+    }, [loadTasks]);
 
+    useEffect(() => {
+        const unsubscribe = navigation.addListener("focus", loadTasks);
         return unsubscribe;
-    }, [navigation]);
+    }, [navigation, loadTasks]);
 
     useEffect(() => {
         setFilter(taskFilter);
@@ -160,9 +150,9 @@ export default function TaskListScreen({ navigation }: Props) {
                 renderItem={({ item }) => (
                     <TaskItem
                         task={item}
-                        onToggle={toggle}
+                        onToggle={toggleTask}
                         onEdit={(task) => navigation.navigate("Form", { task })}
-                        onDelete={del}
+                        onDelete={deleteTask}
                     />
                 )}
                 ListEmptyComponent={

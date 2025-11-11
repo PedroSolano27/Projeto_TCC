@@ -1,10 +1,8 @@
-// Contexto para opções
-
-// Terceiros
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
     createContext,
     ReactNode,
+    useCallback,
     useContext,
     useEffect,
     useState,
@@ -17,7 +15,7 @@ type TaskFilter = "all" | "completed" | "pending";
 type Settings = {
     theme: Theme;
     taskFilter: TaskFilter;
-    defaultReminderMinutes: number | null; // null = sem lembrete padrão
+    defaultReminderMinutes: number | null;
 };
 
 type SettingsContextType = Settings & {
@@ -31,14 +29,12 @@ type SettingsContextType = Settings & {
 
 const STORAGE_KEY = "@app_settings_v1";
 
-// Configurações padrão
 const defaults: Settings = {
     theme: (Appearance.getColorScheme() ?? "light") as Theme,
     taskFilter: "all",
     defaultReminderMinutes: 60,
 };
 
-// Cria o contexto
 const SettingsContext = createContext<SettingsContextType>({
     ...defaults,
     loading: false,
@@ -49,10 +45,8 @@ const SettingsContext = createContext<SettingsContextType>({
     resetSettings: () => {},
 });
 
-// Cria o hook do contexto
 export const useSettings = () => useContext(SettingsContext);
 
-// Cria o provedor do contexto
 export function SettingsProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState<boolean>(true);
     const [theme, setThemeState] = useState<Theme>(defaults.theme);
@@ -63,14 +57,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         number | null
     >(defaults.defaultReminderMinutes);
 
-    // Carrega do AsyncStorage
     useEffect(() => {
         let mounted = true;
-        (async () => {
+        const loadSettings = async () => {
             try {
                 const raw = await AsyncStorage.getItem(STORAGE_KEY);
 
-                // Salva padrão na primeira execução
                 if (!raw) {
                     await AsyncStorage.setItem(
                         STORAGE_KEY,
@@ -86,7 +78,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                     );
                 }
 
-                // Salva atualizado
                 if (raw) {
                     const parsed = JSON.parse(raw) as Partial<Settings>;
 
@@ -105,56 +96,64 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
             } finally {
                 if (mounted) setLoading(false);
             }
-        })();
+        };
+
+        loadSettings();
 
         return () => {
             mounted = false;
         };
     }, []);
 
-    // Salva utilitário
-    async function persist(next: Partial<Settings>) {
-        try {
-            const current: Settings = {
-                theme,
-                taskFilter,
-                defaultReminderMinutes,
-            };
-            const merged: Settings = { ...current, ...next };
+    const persist = useCallback(
+        async (next: Partial<Settings>) => {
+            try {
+                const current: Settings = {
+                    theme,
+                    taskFilter,
+                    defaultReminderMinutes,
+                };
+                const merged: Settings = { ...current, ...next };
 
-            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-        } catch (err) {
-            console.warn("Erro ao persistir settings", err);
-        }
-    }
+                await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+            } catch (err) {
+                console.warn("Erro ao persistir settings", err);
+            }
+        },
+        [theme, taskFilter, defaultReminderMinutes],
+    );
 
-    // Inverte tema
-    function toggleTheme() {
+    const toggleTheme = useCallback(() => {
         const next = theme === "light" ? "dark" : "light";
         setThemeState(next);
         persist({ theme: next });
-    }
+    }, [theme, persist]);
 
-    // Altera tema
-    function setTheme(t: Theme) {
-        setThemeState(t);
-        persist({ theme: t });
-    }
+    const setTheme = useCallback(
+        (t: Theme) => {
+            setThemeState(t);
+            persist({ theme: t });
+        },
+        [persist],
+    );
 
-    // Altera Filtro padrão
-    function setTaskFilter(f: TaskFilter) {
-        setTaskFilterState(f);
-        persist({ taskFilter: f });
-    }
+    const setTaskFilter = useCallback(
+        (f: TaskFilter) => {
+            setTaskFilterState(f);
+            persist({ taskFilter: f });
+        },
+        [persist],
+    );
 
-    // Altera lembrete padrão
-    function setDefaultReminderMinutes(m: number | null) {
-        setDefaultReminderMinutesState(m);
-        persist({ defaultReminderMinutes: m });
-    }
+    const setDefaultReminderMinutes = useCallback(
+        (m: number | null) => {
+            setDefaultReminderMinutesState(m);
+            persist({ defaultReminderMinutes: m });
+        },
+        [persist],
+    );
 
-    // Reseta configurações
-    async function resetSettings() {
+    const resetSettings = useCallback(async () => {
         try {
             setLoading(true);
             setThemeState(defaults.theme);
@@ -167,7 +166,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         } finally {
             setLoading(false);
         }
-    }
+    }, []);
 
     return (
         <SettingsContext.Provider

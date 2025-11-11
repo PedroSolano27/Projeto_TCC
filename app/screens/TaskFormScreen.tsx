@@ -1,28 +1,25 @@
-// Tela de Formulário de Tarefas
-
-// Tipos
-import { RootStackParamList } from "../types/StackParamList";
-import { Task } from "../types/Task";
-
-// Terceiros
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
-import "react-native-get-random-values";
-import { v4 as uuidv4 } from "uuid";
-import { useSettings } from "../context/SettingsContext";
-import { TaskStorage } from "../services/TaskStorage";
-import { createStyles } from "../styles/ScreenStyles";
-
-// Elementos
-import DateTimePicker from "@react-native-community/datetimepicker";
 import {
     Alert,
     Platform,
+    ScrollView,
     Text,
     TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
+import "react-native-get-random-values";
+import { v4 as uuidv4 } from "uuid";
+import { TagSelector } from "../components/TagSelector";
+import { TimeSelector } from "../components/TimeSelector";
+import { DEFAULT_TAG } from "../config/tags";
+import { useSettings } from "../context/SettingsContext";
+import { TaskStorage } from "../services/TaskStorage";
+import { createStyles } from "../styles/ScreenStyles";
+import { RootStackParamList } from "../types/StackParamList";
+import { Task } from "../types/Task";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Form">;
 
@@ -31,7 +28,6 @@ export default function TaskFormScreen({ route, navigation }: Props) {
     const { addTask, updateTask } = TaskStorage();
     const { TaskFormStyles } = createStyles(theme);
 
-    // Pega uma Task se ela já existe
     const existing = route.params?.task as Task | undefined;
 
     const [title, setTitle] = useState<string>(existing?.title || "");
@@ -43,28 +39,19 @@ export default function TaskFormScreen({ route, navigation }: Props) {
     const [date, setDate] = useState<Date>(
         existing?.dueDate ? new Date(existing.dueDate) : new Date(),
     );
-    const [pointsText, setPointsText] = useState<string>(
-        typeof existing?.points === "number" ? String(existing?.points) : "",
+    const [selectedTag, setSelectedTag] = useState<string>(
+        existing?.selectedTag || DEFAULT_TAG,
     );
-    const [xpText, setXpText] = useState<string>(
-        typeof existing?.xpReward === "number"
-            ? String(existing?.xpReward)
-            : "",
+    const [selectedTimes, setSelectedTimes] = useState<string[]>(
+        existing?.notificationIds ? ["1h"] : [],
     );
 
-    // Tags (vírgula separados)
-    const [tagsText, setTagsText] = useState<string>(
-        existing?.tags?.join(", ") || "",
-    );
-
-    // Título da tela
     useEffect(() => {
         navigation.setOptions({
             title: existing ? "Editar Tarefa" : "Nova Tarefa",
         });
     }, [existing, navigation]);
 
-    // Salva a data selecionada no formato ISO
     function onChangeDate(_: any, selectedDate?: Date) {
         setShowPicker(false);
         if (selectedDate) {
@@ -73,21 +60,6 @@ export default function TaskFormScreen({ route, navigation }: Props) {
         }
     }
 
-    // Valida e converte tags string -> string[]
-    function parseTags(text: string) {
-        return text
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean);
-    }
-
-    // Converte campo numérico seguro
-    function parseNumber(text: string) {
-        const n = Number(text);
-        return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : undefined;
-    }
-
-    // Salva (cria ou atualiza)
     async function save() {
         if (!title.trim()) {
             Alert.alert(
@@ -97,115 +69,102 @@ export default function TaskFormScreen({ route, navigation }: Props) {
             return;
         }
 
-        const tags = parseTags(tagsText);
-        const points = parseNumber(pointsText);
-        const xpReward = parseNumber(xpText);
-
-        // Atualiza se já existe
         if (existing && existing.id) {
             const updated: Task = {
                 ...existing,
-                tags,
-                notes,
-                points,
-                dueDate,
-                xpReward,
                 title: title.trim(),
+                notes,
+                selectedTag,
+                dueDate,
+                notificationIds:
+                    selectedTimes.length > 0 ? selectedTimes : undefined,
             };
             try {
                 await updateTask(updated);
                 navigation.goBack();
-            } catch (err) {
-                console.warn("Erro ao atualizar tarefa", err);
+            } catch {
                 Alert.alert("Erro", "Não foi possível atualizar a tarefa.");
             }
             return;
         }
 
-        // Cria nova tarefa
         const newTask: Task = {
-            notes,
-            tags,
-            points,
-            dueDate,
-            xpReward,
             id: uuidv4(),
-            completed: false,
             title: title.trim(),
-            notificationId: null,
-            completedAt: undefined,
+            notes,
+            selectedTag,
+            dueDate,
+            completed: false,
             createdAt: new Date().toISOString(),
+            notificationIds:
+                selectedTimes.length > 0 ? selectedTimes : undefined,
         };
 
         try {
             await addTask(newTask);
             navigation.goBack();
-        } catch (err) {
-            console.warn("Erro ao adicionar tarefa", err);
+        } catch {
             Alert.alert("Erro", "Não foi possível criar a tarefa.");
         }
     }
 
     return (
-        <View style={TaskFormStyles.container}>
-            <Text style={TaskFormStyles.label}>Título</Text>
-            <TextInput
-                value={title}
-                onChangeText={setTitle}
-                style={[
-                    TaskFormStyles.input,
-                    !title && TaskFormStyles.inputError,
-                ]}
-                placeholder="Ex: Estudar para prova"
-                returnKeyType="done"
+        <ScrollView
+            style={TaskFormStyles.container}
+            contentContainerStyle={{ paddingBottom: 20 }}
+        >
+            <View style={TaskFormStyles.formGroup}>
+                <Text style={TaskFormStyles.label}>Título</Text>
+                <TextInput
+                    value={title}
+                    onChangeText={setTitle}
+                    style={[
+                        TaskFormStyles.input,
+                        !title && TaskFormStyles.inputError,
+                    ]}
+                    placeholder="Ex: Estudar para prova"
+                    placeholderTextColor="#999"
+                    returnKeyType="done"
+                />
+            </View>
+
+            <View style={TaskFormStyles.formGroup}>
+                <Text style={TaskFormStyles.label}>Notas</Text>
+                <TextInput
+                    value={notes}
+                    onChangeText={setNotes}
+                    style={[TaskFormStyles.input, { height: 80 }]}
+                    multiline
+                    placeholder="Detalhes adicionais..."
+                    placeholderTextColor="#999"
+                />
+            </View>
+
+            <TagSelector
+                selectedTag={selectedTag}
+                onSelectTag={setSelectedTag}
+                theme={theme}
             />
 
-            <Text style={TaskFormStyles.label}>Notas</Text>
-            <TextInput
-                value={notes}
-                onChangeText={setNotes}
-                style={[TaskFormStyles.input, { height: 80 }]}
-                multiline
-                placeholder="Detalhes..."
+            <TimeSelector
+                selectedTimes={selectedTimes}
+                onSelectTimes={setSelectedTimes}
+                theme={theme}
             />
 
-            <Text style={TaskFormStyles.label}>Tags (vírgula separados)</Text>
-            <TextInput
-                value={tagsText}
-                onChangeText={setTagsText}
-                style={TaskFormStyles.input}
-                placeholder="ex: estudos, trabalho"
-            />
-
-            <Text style={TaskFormStyles.label}>Pontos (opcional)</Text>
-            <TextInput
-                value={pointsText}
-                onChangeText={setPointsText}
-                style={TaskFormStyles.input}
-                placeholder="Ex: 10"
-                keyboardType="number-pad"
-            />
-
-            <Text style={TaskFormStyles.label}>XP reward (opcional)</Text>
-            <TextInput
-                value={xpText}
-                onChangeText={setXpText}
-                style={TaskFormStyles.input}
-                placeholder="Ex: 15"
-                keyboardType="number-pad"
-            />
-
-            <Text style={TaskFormStyles.label}>Data de Vencimento</Text>
-            <TouchableOpacity
-                onPress={() => setShowPicker(true)}
-                style={TaskFormStyles.dateBtn}
-            >
-                <Text style={TaskFormStyles.dateText}>
-                    {dueDate
-                        ? date.toLocaleDateString("pt-BR")
-                        : "Selecionar data"}
-                </Text>
-            </TouchableOpacity>
+            <View style={TaskFormStyles.formGroup}>
+                <Text style={TaskFormStyles.label}>Data de Vencimento</Text>
+                <TouchableOpacity
+                    onPress={() => setShowPicker(true)}
+                    style={TaskFormStyles.dateBtn}
+                >
+                    <Text style={TaskFormStyles.dateText}>
+                        {dueDate
+                            ? date.toLocaleDateString("pt-BR")
+                            : "Selecionar data (opcional)"}
+                    </Text>
+                </TouchableOpacity>
+            </View>
 
             {showPicker && (
                 <DateTimePicker
@@ -224,8 +183,8 @@ export default function TaskFormScreen({ route, navigation }: Props) {
                     !title.trim() && TaskFormStyles.saveBtnDisabled,
                 ]}
             >
-                <Text style={TaskFormStyles.saveText}>Salvar</Text>
+                <Text style={TaskFormStyles.saveText}>Salvar Tarefa</Text>
             </TouchableOpacity>
-        </View>
+        </ScrollView>
     );
 }

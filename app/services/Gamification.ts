@@ -1,10 +1,6 @@
-// Gamificação
-
-// Tipos
+import { getTagRewards } from "../config/tags";
 import { Badge } from "../types/GamificationTypes";
 import { Task } from "../types/Task";
-
-// Terceiros
 import {
     loadProfile,
     requiredXpForLevel,
@@ -15,7 +11,6 @@ function todayString() {
     return new Date().toISOString().slice(0, 10);
 }
 
-// Define badges disponíveis e suas condições
 function checkBadges(profile: {
     badges: Badge[];
     streak: number;
@@ -24,7 +19,6 @@ function checkBadges(profile: {
 }): Badge[] {
     const newBadges: Badge[] = [];
 
-    // First Task
     if (!profile.badges.some((b) => b.id === "first-task")) {
         newBadges.push({
             id: "first-task",
@@ -34,7 +28,6 @@ function checkBadges(profile: {
         });
     }
 
-    // 7-Day Streak
     if (
         !profile.badges.some((b) => b.id === "7-day-streak") &&
         profile.streak >= 7
@@ -47,7 +40,6 @@ function checkBadges(profile: {
         });
     }
 
-    // 30-Day Streak
     if (
         !profile.badges.some((b) => b.id === "30-day-streak") &&
         profile.streak >= 30
@@ -60,7 +52,6 @@ function checkBadges(profile: {
         });
     }
 
-    // Level 5
     if (!profile.badges.some((b) => b.id === "level-5") && profile.level >= 5) {
         newBadges.push({
             id: "level-5",
@@ -70,7 +61,6 @@ function checkBadges(profile: {
         });
     }
 
-    // Level 10
     if (
         !profile.badges.some((b) => b.id === "level-10") &&
         profile.level >= 10
@@ -83,7 +73,6 @@ function checkBadges(profile: {
         });
     }
 
-    // Level 20
     if (
         !profile.badges.some((b) => b.id === "level-20") &&
         profile.level >= 20
@@ -96,7 +85,6 @@ function checkBadges(profile: {
         });
     }
 
-    // 100 Points
     if (
         !profile.badges.some((b) => b.id === "100-points") &&
         profile.points >= 100
@@ -109,7 +97,6 @@ function checkBadges(profile: {
         });
     }
 
-    // 500 Points
     if (
         !profile.badges.some((b) => b.id === "500-points") &&
         profile.points >= 500
@@ -122,7 +109,6 @@ function checkBadges(profile: {
         });
     }
 
-    // 1000 Points
     if (
         !profile.badges.some((b) => b.id === "1000-points") &&
         profile.points >= 1000
@@ -138,17 +124,13 @@ function checkBadges(profile: {
     return newBadges;
 }
 
-// Aplica recompensas de completar tarefas
-export async function applyCompletionRewards(
-    task: Task,
-    extra?: { basePoints?: number },
-) {
+export async function applyCompletionRewards(task: Task) {
     const profile = await loadProfile();
 
-    const basePoints = extra?.basePoints ?? task.xpReward ?? 10;
-    const tagBonus = task.tags?.includes("important") ? 5 : 0;
+    const tagRewards = getTagRewards(task.selectedTag);
+    const basePoints = tagRewards.basePoints;
+    const baseXP = tagRewards.baseXP;
 
-    // Se completou ontem, usa streak+1; Se já completou hoje, não duplica
     const last = profile.lastCompletionDate
         ? profile.lastCompletionDate.slice(0, 10)
         : null;
@@ -163,18 +145,17 @@ export async function applyCompletionRewards(
 
         if (last === yesterday.toISOString().slice(0, 10))
             newStreak = Math.min(profile.streak + 1, 365);
-        else if (last === today) newStreak = profile.streak; // Já contabilizado
+        else if (last === today) newStreak = profile.streak;
     }
 
     const streakBonus = Math.min(newStreak, 7) * 2;
-    const points = basePoints + tagBonus + streakBonus;
-    const xpGain = Math.floor(points * 1.0);
+    const points = basePoints + streakBonus;
+    const xpGain = baseXP + Math.floor(streakBonus * 0.5);
 
     profile.points = (profile.points ?? 0) + points;
     profile.coins = (profile.coins ?? 0) + Math.floor(points / 5);
     profile.xp = (profile.xp ?? 0) + xpGain;
 
-    // Loop de level up
     let leveledUp = false;
     while (profile.xp >= requiredXpForLevel(profile.level + 1)) {
         profile.xp -= requiredXpForLevel(profile.level + 1);
@@ -182,11 +163,9 @@ export async function applyCompletionRewards(
         leveledUp = true;
     }
 
-    // Atualiza streak e lastCompletionDate
     profile.streak = newStreak;
     profile.lastCompletionDate = today;
 
-    // Verifica novas badges
     const newBadges = checkBadges(profile);
     if (newBadges.length) {
         profile.badges = [...(profile.badges ?? []), ...newBadges];

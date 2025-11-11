@@ -60,9 +60,6 @@ All selected notification times are scheduled simultaneously, allowing users to 
     - **Centenário**: Acumulou 100 pontos
     - **Destaque**: Acumulou 500 pontos
     - **Produtividade Extrema**: Acumulou 1000 pontos
-- Visual and animated feedback when tasks are completed
-- Level-up celebrations with modal notifications
-- Points and coins reward system
 
 ### Progress Dashboard
 
@@ -70,7 +67,7 @@ All selected notification times are scheduled simultaneously, allowing users to 
 - Current level, XP progress, points, and coins display
 - Streak counter with visual indicator
 - Unlocked achievements and badges showcase
-- Historical view of recently completed tasks with timestamps and rewards
+- Historical view of recently completed tasks with timestamps
 - Visual progress bars and metric cards
 
 ### Gamification-Triggered Notifications
@@ -83,7 +80,7 @@ All selected notification times are scheduled simultaneously, allowing users to 
 ### User Experience & Design
 
 - Clean, responsive interface with reusable components
-- Extracted UI components for consistency and reusability
+- Extracted UI components for consistency and reusability (Button, Card, FormField)
 - Light and dark theme support with centralized global styles
 - Motivational visuals and feedback
 - Offline functionality with local data persistence
@@ -211,8 +208,9 @@ Location: `app/screens/DashboardScreen.tsx`
     - Streak counter with visual indicator
     - Productivity statistics (completed, pending, completion rate)
     - Achievements showcase
-    - Recently completed tasks with timestamps and rewards
+    - Recently completed tasks with timestamps
 - Data: Loads from UserProfileStorage and TaskStorage
+- Styling: Uses DashboardStyles from centralized ScreenStyles.ts
 
 ### TaskListScreen
 
@@ -226,6 +224,7 @@ Location: `app/screens/TaskListScreen.tsx`
     - Task deletion with confirmation
     - Access to Dashboard and Settings
 - Props: Navigation properties and route parameters
+- Optimization: Uses useCallback for memoized functions
 
 ### TaskFormScreen
 
@@ -234,11 +233,12 @@ Location: `app/screens/TaskFormScreen.tsx`
 - Purpose: Screen for creating and editing tasks
 - Features:
     - Task input form with title and notes
-    - Tag/category management
+    - Tag/category management via TagSelector
     - Due date selection with date picker
-    - Points and XP assignment
+    - Multi-time notification scheduling via TimeSelector
     - Edit existing tasks or create new ones
 - Props: Optional task data for editing
+- Auto-Calculation: Points and XP are automatically calculated based on selected tag
 
 ### SettingsScreen
 
@@ -248,7 +248,7 @@ Location: `app/screens/SettingsScreen.tsx`
 - Features:
     - Theme selection (light/dark)
     - Task filter preferences
-    - Reminder timing configuration
+    - Default reminder timing configuration
     - Data export/import options
     - Settings persistence
 
@@ -257,16 +257,16 @@ Location: `app/screens/SettingsScreen.tsx`
 Location: `app/components/TaskItem.tsx`
 
 - Purpose: Renders individual task items in the task list
-- Props: Task data and callback functions for toggle/delete operations
-- Features: Task display, completion checkbox, delete button
+- Props: Task data and callback functions for toggle/delete/edit operations
+- Features: Task display, completion checkbox, edit and delete buttons
 
 ### XPBar
 
 Location: `app/components/XPBar.tsx`
 
 - Purpose: Visual representation of user's XP progress
-- Props: Current XP, required XP for next level, and level information
-- Features: Animated progress bar with percentage display
+- Props: None (uses useUserProfile hook)
+- Features: Animated progress bar with percentage display and level information
 
 ### LevelUpModal
 
@@ -275,6 +275,53 @@ Location: `app/components/LevelUpModal.tsx`
 - Purpose: Displays celebration modal when user levels up
 - Props: Level achievement and reward coin information
 - Features: Animated modal with congratulations message
+
+### TagSelector
+
+Location: `app/components/TagSelector.tsx`
+
+- Purpose: Reusable component for single-select tag selection
+- Features:
+    - Modal-based dropdown interface
+    - Displays tag name, description, and reward values
+    - Visual selection indicator
+    - Easy integration with forms
+
+### TimeSelector
+
+Location: `app/components/TimeSelector.tsx`
+
+- Purpose: Reusable component for multi-select notification times
+- Features:
+    - Modal-based multi-select interface
+    - Displays all available time options (1h, 2h, 4h, 8h, 24h)
+    - Checkmarks for selected times
+    - Summary display of selected times
+    - "Feito" (Done) button to close modal
+
+### Button
+
+Location: `app/components/Button.tsx`
+
+- Purpose: Reusable button component with multiple variants
+- Props: label, variant (primary/success/danger/secondary), theme, disabled
+- Features: Consistent styling, disabled state handling
+
+### Card
+
+Location: `app/components/Card.tsx`
+
+- Purpose: Reusable card container component
+- Props: theme, children, and standard View props
+- Features: Consistent background and border styling
+
+### FormField
+
+Location: `app/components/FormField.tsx`
+
+- Purpose: Reusable form input wrapper with label and error support
+- Props: label, error, theme, and standard TextInput props
+- Features: Consistent styling, error state visual feedback
 
 ## Services
 
@@ -289,8 +336,12 @@ Location: `app/services/TaskStorage.ts`
     - `updateTask(updated: Task): Promise<void>` - Updates existing task
     - `removeTask(id: string): Promise<void>` - Deletes task
     - `completeTask(taskId: string): Promise<void>` - Marks task as complete and applies rewards
-    - `scheduleReminder(task: Task): Promise<string | null>` - Schedules notification
-    - `cancelReminder(notificationId: string | null): Promise<void>` - Cancels notification
+    - `scheduleReminders(task: Task): Promise<string[]>` - Schedules multiple notifications
+    - `cancelReminder(notificationId: string): Promise<void>` - Cancels notification
+- Features:
+    - Multi-time notification scheduling (1h, 2h, 4h, 8h, 24h)
+    - Event emission for gamification updates
+    - Automatic notification cancellation on task completion/deletion
 - Events: Emits `levelup` and `pointsEarned` events on task completion
 
 ### Gamification
@@ -299,13 +350,12 @@ Location: `app/services/Gamification.ts`
 
 - Purpose: Handles gamification logic, rewards, and achievement system
 - Key Features:
-    - Task completion rewards calculation
+    - Tag-based task completion rewards calculation
     - Streak calculation and maintenance (up to 365 days)
     - XP and level progression with exponential formula
     - Dynamic badge/achievement awards based on milestones
-    - Bonus points for important tasks and streaks
 - Key Methods:
-    - `applyCompletionRewards(task: Task, extra?: { basePoints?: number }): Promise<{...}>` - Applies rewards and checks for level-ups and badges
+    - `applyCompletionRewards(task: Task): Promise<{...}>` - Applies rewards and checks for level-ups and badges
     - `checkBadges(profile: UserProfile): Badge[]` - Validates and returns newly unlocked badges
 
 ### UserProfileStorage
@@ -362,6 +412,7 @@ Location: `app/context/SettingsContext.tsx`
     - `setDefaultReminderMinutes(m: number | null)` - Sets reminder timing
     - `resetSettings()` - Resets to default settings
 - Persistence: Stores settings in AsyncStorage
+- Optimization: Uses useCallback for memoized functions
 
 ## Hooks
 
@@ -405,8 +456,8 @@ The application implements comprehensive error handling in several key areas:
 1. **Task List Optimization**:
     - FlatList implementation for efficient rendering
     - Task filtering performed in-memory
-    - Memoization of task items to prevent unnecessary re-renders
-    - Pagination-ready architecture
+    - Memoization of task items and callbacks to prevent unnecessary re-renders
+    - useCallback hooks for function stability
 
 2. **Data Management**:
     - Single AsyncStorage key per entity type
@@ -437,7 +488,7 @@ The application implements comprehensive error handling in several key areas:
 - **Base Points**: From tag configuration (e.g., 20 for Urgent, 8 for Personal)
 - **Base XP**: From tag configuration (e.g., 15 for Urgent, 6 for Personal)
 - **Streak Bonus**: 2 XP per consecutive day (up to 7 days max = 14 bonus)
-- **Total XP Gain**: baseXP + (min(streak, 7) _ 2) _ 0.5
+- **Total XP Gain**: baseXP + (min(streak, 7) × 2) × 0.5
 
 ### Level Progression
 
@@ -470,10 +521,10 @@ Tasks no longer have manual point/XP inputs. Instead, rewards are determined by 
 
 1. User selects a tag when creating/editing a task
 2. Tag's `basePoints` and `baseXP` are read from tag configuration
-3. Streak bonus is calculated (min(streak, 7) \* 2)
+3. Streak bonus is calculated (min(streak, 7) × 2)
 4. On task completion:
     - Points = tag.basePoints + streakBonus
-    - XP = tag.baseXP + floor(streakBonus \* 0.5)
+    - XP = tag.baseXP + floor(streakBonus × 0.5)
 5. Profile is updated with new totals
 
 **Benefits:**
@@ -499,23 +550,43 @@ The app uses React Navigation with a native stack navigator:
     - Local component state for UI-specific data
     - Custom hooks for reusable logic
     - Proper TypeScript typing throughout
+    - useCallback for function memoization
 
 2. **Code Organization**:
     - Separation of concerns (UI, logic, storage)
     - Reusable, composable components
     - Centralized type definitions
     - Service-based architecture
+    - Cleaned code without unnecessary comments
 
 3. **UI/UX**:
     - Consistent theming and styling
     - Responsive design patterns
     - Loading states and error feedback
     - Accessible component interactions
+    - Visual feedback for user actions
 
 4. **Data Integrity**:
     - Transaction-like updates in gamification
     - Duplicate prevention for same-day rewards
     - Atomic operations with rollback capability
+
+## Code Quality Improvements
+
+1. **Comment Cleanup**:
+    - Removed non-essential header comments
+    - Removed ESLint disable directives where unnecessary
+    - Preserved important documentation comments
+
+2. **Component Consistency**:
+    - Standardized naming conventions
+    - Consistent error handling patterns
+    - Uniform styling approach across all screens
+
+3. **Performance Optimization**:
+    - Memoized callbacks with useCallback
+    - Efficient dependency arrays
+    - Optimized re-render patterns
 
 ## Limitations and Considerations
 

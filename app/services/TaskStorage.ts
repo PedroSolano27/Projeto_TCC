@@ -1,13 +1,7 @@
-// Implementação do AsyncStorage
-
-// Tipos
-import { Task } from "../types/Task";
-
-//Terceiros
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import EventEmitter from "events";
 import * as Notifications from "expo-notifications";
-import { useSettings } from "../context/SettingsContext";
+import { Task } from "../types/Task";
 import { applyCompletionRewards } from "./Gamification";
 import {
     notifyBadgeUnlocked,
@@ -17,46 +11,45 @@ import {
 
 export const gamificationEvents = new EventEmitter();
 
+const NOTIFICATION_HOURS = {
+    "1h": 1,
+    "2h": 2,
+    "4h": 4,
+    "8h": 8,
+    "24h": 24,
+};
+
 export function TaskStorage() {
     const STORAGE_KEY = "@tasks_v1";
 
-    const { defaultReminderMinutes } = useSettings();
-
-    // Pega todas as tarefas
     async function getAllTasks() {
         const raw = await AsyncStorage.getItem(STORAGE_KEY);
-
         return raw ? (JSON.parse(raw) as Task[]) : [];
     }
 
-    // Salva tarefas
     async function saveAllTasks(tasks: Task[]) {
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
     }
 
-    // Adiciona Tarefa
     async function addTask(task: Task) {
         const tasks = await getAllTasks();
-
-        // Agenda notificação e armazena id na tarefa
-        const notificationId = await scheduleReminder(task);
-        const withNotification = {
+        const notificationIds = await scheduleReminders(task);
+        const withNotifications = {
             ...task,
-            notificationId: notificationId ?? null,
+            notificationIds:
+                notificationIds.length > 0 ? notificationIds : undefined,
         };
-
-        tasks.unshift(withNotification);
+        tasks.unshift(withNotifications);
         await saveAllTasks(tasks);
     }
 
-    // Marca como concluída (helper)
     async function completeTask(taskId: string) {
         const tasks = await getAllTasks();
         const idx = tasks.findIndex((t) => t.id === taskId);
         if (idx === -1) return;
 
         const original = tasks[idx];
-        if (original.completed) return; // já concluída
+        if (original.completed) return;
 
         const updated: Task = {
             ...original,
@@ -64,16 +57,15 @@ export function TaskStorage() {
             completedAt: new Date().toISOString(),
         };
 
-        // Cancela notificação se houver
-        if (original.notificationId) {
-            await cancelReminder(original.notificationId);
+        if (original.notificationIds) {
+            for (const id of original.notificationIds) {
+                await cancelReminder(id);
+            }
         }
 
-        // Persiste mudança
         tasks[idx] = updated;
         await saveAllTasks(tasks);
 
-        // Aplica recompensas de gamificação
         try {
             const result = await applyCompletionRewards(updated);
             if (result?.leveledUp) {
@@ -81,7 +73,6 @@ export function TaskStorage() {
                     level: result.profile.level,
                     coins: result.profile.coins,
                 });
-                // Envia notificação de level up
                 await notifyLevelUp(result.profile.level, result.profile.coins);
             }
             if (result?.points) {
@@ -90,45 +81,42 @@ export function TaskStorage() {
                     xp: result.xpGain,
                 });
             }
-            // Notifica sobre novos badges
             if (result?.newBadges && result.newBadges.length > 0) {
                 for (const badge of result.newBadges) {
                     await notifyBadgeUnlocked(badge.title, badge.description);
                 }
             }
-            // Notifica sobre streak milestones
             if (result?.profile.streak === 7 || result?.profile.streak === 30) {
                 await notifyStreakMilestone(result.profile.streak);
             }
-        } catch (err) {
-            console.warn("Erro ao aplicar recompensas", err);
+        } catch {
+            // Silently ignore errors during reward application
         }
     }
 
-    // Atualiza Tarefa
     async function updateTask(updated: Task) {
         const tasks = await getAllTasks();
         const idx = tasks.findIndex((t) => t.id === updated.id);
 
-        // Cancela notificação anterior se existir
-        if (idx !== -1 && tasks[idx].notificationId) {
-            await cancelReminder(tasks[idx].notificationId);
+        if (idx !== -1 && tasks[idx].notificationIds) {
+            for (const id of tasks[idx].notificationIds) {
+                await cancelReminder(id);
+            }
         }
 
-        // (re)agenda se aplicável (somente se não estiver concluída)
-        let notificationId = null;
+        let notificationIds: string[] | undefined;
         if (!updated.completed) {
-            notificationId = await scheduleReminder(updated);
+            const ids = await scheduleReminders(updated);
+            notificationIds = ids.length > 0 ? ids : undefined;
         }
 
-        const newTask = { ...updated, notificationId: notificationId ?? null };
+        const newTask = { ...updated, notificationIds };
 
         if (idx !== -1) {
             const wasCompleted = tasks[idx].completed;
             tasks[idx] = newTask;
             await saveAllTasks(tasks);
 
-            // Se passou de não concluída para concluída via updateTask, aplicar recompensas
             if (!wasCompleted && newTask.completed) {
                 try {
                     const result = await applyCompletionRewards(newTask);
@@ -144,81 +132,93 @@ export function TaskStorage() {
                             xp: result.xpGain,
                         });
                     }
-                } catch (err) {
-                    console.warn("Erro ao aplicar recompensas", err);
+                } catch {
+                    // Silently ignore errors during reward application
                 }
             }
         } else {
-            // inserir nova
             tasks.unshift(newTask);
             await saveAllTasks(tasks);
         }
     }
 
-    // Remove Tarefa
     async function removeTask(id: string) {
         const tasks = await getAllTasks();
-
         const found = tasks.find((t) => t.id === id);
-        if (found && found.notificationId) {
-            await cancelReminder(found.notificationId);
+
+        if (found && found.notificationIds) {
+            for (const notificationId of found.notificationIds) {
+                await cancelReminder(notificationId);
+            }
         }
 
         const filtered = tasks.filter((t) => t.id !== id);
         await saveAllTasks(filtered);
     }
 
-    // Envia notificação
-    async function scheduleReminder(task: Task) {
+    async function scheduleReminders(task: Task): Promise<string[]> {
+        const notificationIds: string[] = [];
+
         try {
-            if (!task.dueDate || task.completed) return null;
+            if (!task.dueDate || task.completed || !task.notificationIds) {
+                return [];
+            }
 
             const due = new Date(task.dueDate);
             const now = new Date();
             const diffMs = due.getTime() - now.getTime();
 
-            // Só agenda se ainda não passou e estiver dentro de 7 dias
-            if (diffMs <= 0 || diffMs > 1000 * 60 * 60 * 24 * 7) return null;
+            if (diffMs <= 0 || diffMs > 1000 * 60 * 60 * 24 * 7) {
+                return [];
+            }
 
-            // Usa o valor defaultReminderMinutes
-            const offsetMs =
-                defaultReminderMinutes !== null
-                    ? defaultReminderMinutes * 60 * 1000
-                    : 60 * 60 * 1000; // fallback: 1h
+            for (const timeId of task.notificationIds) {
+                const hours =
+                    NOTIFICATION_HOURS[
+                        timeId as keyof typeof NOTIFICATION_HOURS
+                    ];
+                if (!hours) continue;
 
-            const triggerDate = new Date(
-                Math.max(due.getTime() - offsetMs, now.getTime() + 1000 * 10),
-            );
+                const offsetMs = hours * 60 * 60 * 1000;
+                const triggerDate = new Date(
+                    Math.max(
+                        due.getTime() - offsetMs,
+                        now.getTime() + 1000 * 10,
+                    ),
+                );
 
-            const id = await Notifications.scheduleNotificationAsync({
-                content: {
-                    title: "Tarefa próxima do vencimento",
-                    body: `${task.title}`,
-                    data: { taskId: task.id },
-                },
-                trigger: {
-                    type: Notifications.SchedulableTriggerInputTypes.DATE,
-                    date: triggerDate,
-                },
-            });
-
-            return id;
-        } catch (err) {
-            console.warn("Erro ao agendar notificação", err);
-            return null;
+                try {
+                    const id = await Notifications.scheduleNotificationAsync({
+                        content: {
+                            title: "Tarefa próxima do vencimento",
+                            body: `${task.title}`,
+                            data: { taskId: task.id },
+                        },
+                        trigger: {
+                            type: Notifications.SchedulableTriggerInputTypes
+                                .DATE,
+                            date: triggerDate,
+                        },
+                    });
+                    notificationIds.push(id);
+                } catch {
+                    // Continue with next notification time
+                }
+            }
+        } catch {
+            // Return whatever notifications were scheduled
         }
+
+        return notificationIds;
     }
 
-    // Concela Notificação
-    async function cancelReminder(notificationId?: string | null) {
-        if (notificationId) {
-            try {
-                await Notifications.cancelScheduledNotificationAsync(
-                    notificationId,
-                );
-            } catch (err) {
-                console.warn("Erro ao cancelar notificação", err);
-            }
+    async function cancelReminder(notificationId: string) {
+        try {
+            await Notifications.cancelScheduledNotificationAsync(
+                notificationId,
+            );
+        } catch {
+            // Silently ignore errors
         }
     }
 
@@ -228,7 +228,7 @@ export function TaskStorage() {
         addTask,
         updateTask,
         removeTask,
-        scheduleReminder,
+        scheduleReminders,
         cancelReminder,
         completeTask,
     };

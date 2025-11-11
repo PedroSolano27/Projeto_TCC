@@ -10,6 +10,6 @@ Orientador: Roger Sá da Silva
 
 Pendências:
 
-- Mudar estilo de personalização dos lembretes (utiizar seletor);
-- Criar Tags de tarefas (Ex: Urgente, Para Mais tarde, etc...);
+- Trocar componentes por reutilizáveis
+- Separar o docs por módulo
 - Atualizar Design;
