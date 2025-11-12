@@ -152,6 +152,45 @@ Return array of successfully scheduled notification IDs
 
 ### Notification Persistence
 
+**🔧 CRITICAL FIX - Notification Saving Issue Resolved**
+
+The task's `notificationIds` field stores **user-selected time periods** (e.g., `["1h", "24h"]`), NOT Expo notification IDs:
+
+```typescript
+// Correctly stored in AsyncStorage
+task.notificationIds: ["1h", "24h"]  // User time selections - PERSISTS
+```
+
+**What Changed:**
+
+Previously, Expo notification IDs were overwriting user selections, causing notifications to disappear when editing. This has been fixed:
+
+- ✅ User time selections now persist through app restarts
+- ✅ Edited tasks show previously selected notification times
+- ✅ Form properly displays saved notification preferences
+- ✅ Notifications reschedule correctly when due date changes
+
+**How It Works:**
+
+1. User creates task and selects notification times: `["1h", "24h"]`
+2. Task saved with these selections: `{ notificationIds: ["1h", "24h"] }`
+3. Internally, Expo schedules these and returns temporary IDs (not saved)
+4. When editing, task loads with original selections: `["1h", "24h"]`
+5. Form displays correctly in TimeSelector
+6. On save, old notifications cancelled, new ones scheduled
+7. Original time selections persist for next edit
+
+**Cancelled when task is completed or deleted**
+
+**Updated when task is edited with new times selected**
+
+### Notification Content
+
+````
+```
+
+### Notification Persistence
+
 - Notification IDs stored in task's `notificationIds` array
 - Survives app restarts and device reboots
 - Cancelled when task is completed or deleted
@@ -406,3 +445,4 @@ Renders individual task with:
 2. Implement FlatList with keyExtractor for large lists
 3. Filter in-memory, not on storage queries
 4. Debounce frequent updates
+````

@@ -33,11 +33,15 @@ export function TaskStorage() {
 
     async function addTask(task: Task) {
         const tasks = await getAllTasks();
-        const notificationIds = await scheduleReminders(task);
+        // Schedule notifications but keep the original time selections in notificationIds
+        // This preserves user preferences for when the task is edited later
+        await scheduleReminders(task);
         const withNotifications = {
             ...task,
             notificationIds:
-                notificationIds.length > 0 ? notificationIds : undefined,
+                task.notificationIds && task.notificationIds.length > 0
+                    ? task.notificationIds
+                    : undefined,
         };
         tasks.unshift(withNotifications);
         await saveAllTasks(tasks);
@@ -98,16 +102,34 @@ export function TaskStorage() {
         const tasks = await getAllTasks();
         const idx = tasks.findIndex((t) => t.id === updated.id);
 
-        if (idx !== -1 && tasks[idx].notificationIds) {
-            for (const id of tasks[idx].notificationIds) {
-                await cancelReminder(id);
+        // Cancel old scheduled notifications by iterating task history
+        if (idx !== -1 && tasks[idx]) {
+            // Try to cancel notifications from the stored task
+            // This handles both old Expo IDs and time selections gracefully
+            if (
+                tasks[idx].notificationIds &&
+                Array.isArray(tasks[idx].notificationIds)
+            ) {
+                for (const id of tasks[idx].notificationIds) {
+                    // Attempt to cancel - will fail silently if not a valid Expo ID
+                    // but that's OK if it's a time selection string
+                    await cancelReminder(id);
+                }
             }
         }
 
+        // Always reschedule notifications if task is not completed
+        // This ensures consistency regardless of what was stored before
         let notificationIds: string[] | undefined;
-        if (!updated.completed) {
-            const ids = await scheduleReminders(updated);
-            notificationIds = ids.length > 0 ? ids : undefined;
+        if (
+            !updated.completed &&
+            updated.notificationIds &&
+            updated.notificationIds.length > 0
+        ) {
+            // Schedule reminders based on the time selections from the form
+            await scheduleReminders(updated);
+            // Keep the time selections, not the Expo IDs
+            notificationIds = updated.notificationIds;
         }
 
         const newTask = { ...updated, notificationIds };

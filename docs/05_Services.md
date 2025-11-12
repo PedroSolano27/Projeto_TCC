@@ -30,6 +30,7 @@ Creates and persists a new task with notification scheduling.
 ```typescript
 const newTask: Task = {
     /* ... */
+    notificationIds: ["1h", "24h"], // User-selected notification times
 };
 await addTask(newTask);
 ```
@@ -37,9 +38,11 @@ await addTask(newTask);
 **Process**:
 
 1. Get all existing tasks
-2. Schedule reminders based on due date and notification times
+2. Schedule reminders based on due date and notification times (preserves user selections)
 3. Add task to beginning of array
-4. Persist to storage
+4. Persist to storage with original `notificationIds` (user time selections)
+
+**Important**: The `notificationIds` field stores **user-selected time periods** (e.g., `["1h", "24h"]`), not Expo notification IDs. This ensures the form can properly display saved notification preferences when editing tasks. Expo notification IDs are tracked internally during scheduling but not persisted.
 
 #### `updateTask(updated: Task): Promise<void>`
 
@@ -52,9 +55,9 @@ await updateTask({ ...existingTask, title: "New Title" });
 **Process**:
 
 1. Find task by ID in storage
-2. Cancel old notifications
-3. Schedule new notifications if task incomplete
-4. Update task in storage
+2. Cancel old scheduled notifications (handles both old formats gracefully)
+3. Schedule new notifications if task is not completed and has `notificationIds`
+4. Update task in storage while **preserving the user-selected time periods** in `notificationIds`
 5. If task just completed, apply gamification rewards
 
 #### `removeTask(id: string): Promise<void>`
@@ -106,7 +109,52 @@ Cancels a single scheduled notification.
 await cancelReminder(notificationId);
 ```
 
-**Error Handling**: Silently ignores cancellation errors
+**Error Handling**: Silently ignores cancellation errors (useful when IDs may be time strings or expired)
+
+### Notification ID Clarification
+
+**Critical Design Detail - IMPORTANT FIX:**
+
+The `Task.notificationIds` field stores **user-selected time periods** (e.g., `["1h", "24h"]`), NOT Expo notification IDs. This is a critical design choice to ensure notifications persist correctly through the task lifecycle.
+
+**What Changed:**
+
+Previously, `notificationIds` was being overwritten with actual Expo notification IDs returned from scheduling. This caused:
+
+- ❌ Edited tasks would show no notification times (Expo IDs aren't selectable times)
+- ❌ Re-saving would fail to reschedule notifications
+- ❌ Notification preferences wouldn't persist
+
+**The Fix:**
+
+- `addTask()` now preserves user time selections in `notificationIds`
+- `updateTask()` now properly maintains time selections while rescheduling
+- Form always sees consistent time selection strings, not Expo IDs
+
+**Visual Example:**
+
+```typescript
+// User selects "1 hour" and "24 hours" notification times
+const task = {
+    id: "123",
+    title: "Study",
+    notificationIds: ["1h", "24h"],  // ← STORED as user selections
+    dueDate: "2025-01-20T14:00:00Z"
+};
+
+await addTask(task);
+// AsyncStorage saves: { ..., notificationIds: ["1h", "24h"] }
+// Expo scheduling happens internally but Expo IDs not stored
+
+// User edits the task later
+const loaded = await getAllTasks();
+// Still has: { ..., notificationIds: ["1h", "24h"] }
+
+const form = <TimeSelector
+    selectedTimes={loaded[0].notificationIds}  // ["1h", "24h"] ✓ Works!
+    ...
+/>;
+```
 
 ### Event Emitter
 

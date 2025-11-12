@@ -510,10 +510,6 @@ console.log("Scheduled:", scheduled);
 
 ## Common Issues
 
-### Issue: Notifications don't persist after restart
-
-**Solution**: Ensure notification IDs are stored in task.notificationIds
-
 ### Issue: Theme doesn't update all components
 
 **Solution**: Use useSettings() hook to get theme, pass to createStyles()
