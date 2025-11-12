@@ -11,4 +11,4 @@ Orientador: Roger Sá da Silva
 Pendências:
 
 - Testar Notificações (em andamento)
-- Revisar design de telas
+- Traduzir para pt-br

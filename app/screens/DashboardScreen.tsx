@@ -55,7 +55,7 @@ export default function DashboardScreen({ navigation }: Props) {
                     { justifyContent: "center", alignItems: "center" },
                 ]}
             >
-                <ActivityIndicator size="large" />
+                <ActivityIndicator size="large" color="#3B82F6" />
             </View>
         );
     }
@@ -66,6 +66,10 @@ export default function DashboardScreen({ navigation }: Props) {
     const completionRate =
         totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
+    // Calculate XP progress for the level
+    const requiredXP = Math.round(Math.pow(1.4, profile.level) * 100);
+    const xpProgress = Math.min((profile.xp / requiredXP) * 100, 100);
+
     const recentCompleted = tasks
         .filter((t) => t.completed && t.completedAt)
         .sort((a, b) => {
@@ -75,14 +79,34 @@ export default function DashboardScreen({ navigation }: Props) {
         })
         .slice(0, 10);
 
+    // Badge icons/emojis
+    const getBadgeEmoji = (badgeId: string) => {
+        const emojiMap: { [key: string]: string } = {
+            firstTask: "🎯",
+            fiveCompleted: "⭐",
+            tenCompleted: "✨",
+            twentyCompleted: "🏆",
+            hundredPoints: "💎",
+            streakThree: "🔥",
+            streakSeven: "⚡",
+            streakThirty: "👑",
+            allTags: "🎨",
+        };
+        return emojiMap[badgeId] || "🏅";
+    };
+
     return (
         <ScrollView style={TaskListStyles.container}>
+            {/* Profile/Level Section */}
             <View style={DashboardStyles.profileSection}>
-                <Text style={DashboardStyles.sectionTitle}>Bem-vindo!</Text>
+                <Text style={DashboardStyles.welcomeText}>
+                    👋 Bem-vindo!
+                </Text>
 
                 <View style={DashboardStyles.profileCard}>
+                    {/* Level, Points, Coins Row */}
                     <View style={DashboardStyles.profileRow}>
-                        <View>
+                        <View style={DashboardStyles.profileColumn}>
                             <Text style={DashboardStyles.profileLabel}>
                                 Nível
                             </Text>
@@ -105,7 +129,7 @@ export default function DashboardScreen({ navigation }: Props) {
                             <Text
                                 style={[
                                     DashboardStyles.profileValue,
-                                    { color: "#FFD700" },
+                                    DashboardStyles.profileCoins,
                                 ]}
                             >
                                 {profile.coins}
@@ -113,104 +137,121 @@ export default function DashboardScreen({ navigation }: Props) {
                         </View>
                     </View>
 
+                    {/* XP Progress Bar */}
                     <View style={DashboardStyles.xpContainer}>
-                        <Text style={DashboardStyles.xpLabel}>Experiência</Text>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                marginBottom: 4,
+                            }}
+                        >
+                            <Text style={DashboardStyles.xpLabel}>
+                                Experiência
+                            </Text>
+                            <Text
+                                style={{
+                                    fontSize: 12,
+                                    color: "#999",
+                                    fontWeight: "600",
+                                }}
+                            >
+                                {Math.round(xpProgress)}%
+                            </Text>
+                        </View>
                         <View style={DashboardStyles.xpBar}>
                             <View
                                 style={[
                                     DashboardStyles.xpFill,
-                                    {
-                                        width: `${Math.min(
-                                            (profile.xp / 100) * 100,
-                                            100,
-                                        )}%`,
-                                    },
+                                    { width: `${xpProgress}%` },
                                 ]}
                             />
                         </View>
                         <Text style={DashboardStyles.xpText}>
-                            {profile.xp} / ~
-                            {Math.round(Math.pow(1.4, profile.level) * 100)}
+                            {profile.xp} / {requiredXP} XP
                         </Text>
                     </View>
                 </View>
 
+                {/* Streak Card */}
                 <View style={DashboardStyles.streakCard}>
                     <Feather
                         name="zap"
-                        size={20}
-                        color="#FF9800"
+                        size={24}
+                        color="#F59E0B"
                         style={DashboardStyles.streakIcon}
                     />
-                    <View>
+                    <View style={DashboardStyles.streakContent}>
                         <Text style={DashboardStyles.streakLabel}>
                             Sequência de Dias
                         </Text>
                         <Text style={DashboardStyles.streakValue}>
-                            {profile.streak} dias
+                            {profile.streak}{" "}
+                            {profile.streak === 1 ? "dia" : "dias"}
                         </Text>
                     </View>
+                    {profile.streak >= 3 && (
+                        <Text style={{ fontSize: 24 }}>
+                            {profile.streak >= 30
+                                ? "👑"
+                                : profile.streak >= 7
+                                  ? "⚡"
+                                  : "🔥"}
+                        </Text>
+                    )}
                 </View>
             </View>
 
-            <View style={DashboardStyles.statsSection}>
-                <Text style={DashboardStyles.statsTitle}>
-                    Estatísticas de Produtividade
-                </Text>
+            {/* Productivity Statistics */}
+            <Text style={DashboardStyles.sectionTitle}>📊 Estatísticas</Text>
 
-                <View style={DashboardStyles.statsRow}>
-                    <View style={DashboardStyles.statCard}>
-                        <Feather
-                            name="check-circle"
-                            size={24}
-                            color="#4CAF50"
-                            style={DashboardStyles.statIcon}
-                        />
-                        <Text style={DashboardStyles.statLabel}>
-                            Concluídas
-                        </Text>
-                        <Text style={DashboardStyles.statValue}>
-                            {completedTasks}
-                        </Text>
-                    </View>
+            <View style={DashboardStyles.statsRow}>
+                <View style={DashboardStyles.statCard}>
+                    <Feather
+                        name="check-circle"
+                        size={28}
+                        color="#22C55E"
+                        style={DashboardStyles.statLabel}
+                    />
+                    <Text style={DashboardStyles.statLabel}>Concluídas</Text>
+                    <Text style={DashboardStyles.statValue}>
+                        {completedTasks}
+                    </Text>
+                </View>
 
-                    <View style={DashboardStyles.statCard}>
-                        <Feather
-                            name="clock"
-                            size={24}
-                            color="#FF9800"
-                            style={DashboardStyles.statIcon}
-                        />
-                        <Text style={DashboardStyles.statLabel}>Pendentes</Text>
-                        <Text style={DashboardStyles.statValue}>
-                            {pendingTasks}
-                        </Text>
-                    </View>
+                <View style={DashboardStyles.statCard}>
+                    <Feather
+                        name="clock"
+                        size={28}
+                        color="#F59E0B"
+                        style={DashboardStyles.statLabel}
+                    />
+                    <Text style={DashboardStyles.statLabel}>Pendentes</Text>
+                    <Text style={DashboardStyles.statValue}>
+                        {pendingTasks}
+                    </Text>
+                </View>
 
-                    <View
-                        style={[
-                            DashboardStyles.statCard,
-                            DashboardStyles.statCardLast,
-                        ]}
-                    >
-                        <Feather
-                            name="pie-chart"
-                            size={24}
-                            color="#2196F3"
-                            style={DashboardStyles.statIcon}
-                        />
-                        <Text style={DashboardStyles.statLabel}>Taxa</Text>
-                        <Text style={DashboardStyles.statValue}>
-                            {completionRate}%
-                        </Text>
-                    </View>
+                <View style={DashboardStyles.statCard}>
+                    <Feather
+                        name="trending-up"
+                        size={28}
+                        color="#3B82F6"
+                        style={DashboardStyles.statLabel}
+                    />
+                    <Text style={DashboardStyles.statLabel}>Taxa</Text>
+                    <Text style={DashboardStyles.statValue}>
+                        {completionRate}%
+                    </Text>
                 </View>
             </View>
 
-            {profile.badges.length > 0 && (
-                <View style={DashboardStyles.badgesSection}>
-                    <Text style={DashboardStyles.badgesTitle}>
-                        Conquistas ({profile.badges.length})
+            {/* Achievements Section */}
+            {profile.badges && profile.badges.length > 0 && (
+                <>
+                    <Text style={DashboardStyles.sectionTitle}>
+                        🏆 Conquistas ({profile.badges.length})
                     </Text>
 
                     <View style={DashboardStyles.badgesContainer}>
@@ -219,60 +260,71 @@ export default function DashboardScreen({ navigation }: Props) {
                                 key={badge.id}
                                 style={DashboardStyles.badgeItem}
                             >
-                                <Feather
-                                    name="award"
-                                    size={24}
-                                    color="#FFD700"
-                                    style={DashboardStyles.badgeIcon}
-                                />
-                                <Text style={DashboardStyles.badgeTitle}>
+                                <Text style={DashboardStyles.badgeIcon}>
+                                    {getBadgeEmoji(badge.id)}
+                                </Text>
+                                <Text
+                                    style={DashboardStyles.badgeTitle}
+                                    numberOfLines={2}
+                                >
                                     {badge.title}
                                 </Text>
-                                <Text style={DashboardStyles.badgeDescription}>
+                                <Text
+                                    style={DashboardStyles.badgeDescription}
+                                    numberOfLines={2}
+                                >
                                     {badge.description}
                                 </Text>
                             </View>
                         ))}
                     </View>
-                </View>
+                </>
             )}
 
+            {/* Recent Completed Tasks */}
             {recentCompleted.length > 0 && (
-                <View style={DashboardStyles.recentSection}>
-                    <Text style={DashboardStyles.recentTitle}>
-                        Tarefas Concluídas Recentes
+                <>
+                    <Text style={DashboardStyles.sectionTitle}>
+                        ✅ Recentes
                     </Text>
 
-                    <FlatList
-                        scrollEnabled={false}
-                        data={recentCompleted}
-                        keyExtractor={(item) => item.id}
-                        renderItem={({ item }) => (
-                            <View style={DashboardStyles.recentItem}>
-                                <Text
-                                    style={DashboardStyles.recentItemTitle}
-                                    numberOfLines={1}
-                                >
-                                    {item.title}
-                                </Text>
-                                <Text style={DashboardStyles.recentItemDate}>
-                                    Concluída em:{" "}
-                                    {item.completedAt
-                                        ? new Date(
-                                              item.completedAt,
-                                          ).toLocaleDateString("pt-BR", {
-                                              year: "numeric",
-                                              month: "short",
-                                              day: "numeric",
-                                              hour: "2-digit",
-                                              minute: "2-digit",
-                                          })
-                                        : "Sem data"}
-                                </Text>
-                            </View>
-                        )}
-                    />
-                </View>
+                    <View
+                        style={{
+                            paddingHorizontal: 16,
+                            marginBottom: 32,
+                        }}
+                    >
+                        <FlatList
+                            scrollEnabled={false}
+                            data={recentCompleted}
+                            keyExtractor={(item) => item.id}
+                            renderItem={({ item }) => (
+                                <View style={DashboardStyles.recentItem}>
+                                    <Text
+                                        style={DashboardStyles.recentItemTitle}
+                                        numberOfLines={1}
+                                    >
+                                        {item.title}
+                                    </Text>
+                                    <Text
+                                        style={DashboardStyles.recentItemDate}
+                                    >
+                                        {item.completedAt
+                                            ? new Date(
+                                                  item.completedAt,
+                                              ).toLocaleDateString("pt-BR", {
+                                                  month: "short",
+                                                  day: "numeric",
+                                                  hour: "2-digit",
+                                                  minute: "2-digit",
+                                              })
+                                            : "Sem data"}
+                                    </Text>
+                                </View>
+                            )}
+                        />
+                    </View>
+                </>
             )}
         </ScrollView>
     );

@@ -184,11 +184,6 @@ Previously, Expo notification IDs were overwriting user selections, causing noti
 
 **Updated when task is edited with new times selected**
 
-### Notification Content
-
-````
-```
-
 ### Notification Persistence
 
 - Notification IDs stored in task's `notificationIds` array
@@ -445,4 +440,3 @@ Renders individual task with:
 2. Implement FlatList with keyExtractor for large lists
 3. Filter in-memory, not on storage queries
 4. Debounce frequent updates
-````

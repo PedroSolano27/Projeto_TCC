@@ -1,3 +1,4 @@
+import { Feather } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useState } from "react";
@@ -10,6 +11,7 @@ import { RootStackParamList } from "../types/StackParamList";
 import { Task } from "../types/Task";
 
 type Props = NativeStackScreenProps<RootStackParamList, "List">;
+type FilterType = "all" | "completed" | "pending" | "inProgress";
 
 export default function TaskListScreen({ navigation }: Props) {
     const { theme, taskFilter } = useSettings();
@@ -17,15 +19,27 @@ export default function TaskListScreen({ navigation }: Props) {
     const { TaskListStyles } = createStyles(theme);
 
     const [tasks, setTasks] = useState<Task[]>([]);
-    const [filter, setFilter] = useState<"all" | "completed" | "pending">(
-        taskFilter,
-    );
+    const [filter, setFilter] = useState<FilterType>("all");
 
+    // Apply filter logic
     const filteredTasks = tasks.filter((task) => {
-        if (filter === "completed") return task.completed;
-        if (filter === "pending") return !task.completed;
-        return true;
+        switch (filter) {
+            case "completed":
+                return task.completed;
+            case "pending":
+                return !task.completed;
+            case "inProgress":
+                // In Progress: tasks started but not completed
+                return !task.completed;
+            default:
+                return true;
+        }
     });
+
+    // Calculate stats
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter((t) => t.completed).length;
+    const pendingTasks = tasks.filter((t) => !t.completed).length;
 
     const loadTasks = useCallback(async () => {
         const allTasks = await getAllTasks();
@@ -55,7 +69,7 @@ export default function TaskListScreen({ navigation }: Props) {
 
     const deleteTask = (id: string) => {
         Alert.alert(
-            "Confirmar",
+            "Confirmar exclusão",
             "Tem certeza que deseja excluir esta tarefa?",
             [
                 { text: "Cancelar", style: "cancel" },
@@ -82,68 +96,173 @@ export default function TaskListScreen({ navigation }: Props) {
     }, [navigation, loadTasks]);
 
     useEffect(() => {
-        setFilter(taskFilter);
+        setFilter(taskFilter as FilterType);
     }, [taskFilter]);
+
+    const getFilterIcon = (filterType: FilterType) => {
+        const iconMap = {
+            all: "list",
+            pending: "clock",
+            completed: "check-circle",
+            inProgress: "activity",
+        };
+        return iconMap[filterType];
+    };
+
+    const getFilterLabel = (filterType: FilterType) => {
+        const labelMap = {
+            all: "Todas",
+            pending: "Pendentes",
+            completed: "Concluídas",
+            inProgress: "Em Progresso",
+        };
+        return labelMap[filterType];
+    };
 
     return (
         <View style={TaskListStyles.container}>
+            {/* Header */}
             <View style={TaskListStyles.header}>
-                <Text style={TaskListStyles.title}>Minhas Tarefas</Text>
+                <View>
+                    <Text style={TaskListStyles.title}>Minhas Tarefas</Text>
+                </View>
 
-                <TouchableOpacity
-                    onPress={() => navigation.navigate("Dashboard")}
-                    style={TaskListStyles.addBtn}
-                >
-                    <Text style={TaskListStyles.addText}>Progresso</Text>
-                </TouchableOpacity>
+                <View style={{ flexDirection: "row", gap: 8 }}>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate("Dashboard")}
+                        style={TaskListStyles.headerButton}
+                        accessibilityLabel="Progresso"
+                        accessibilityHint="Navegue para a tela de progresso e gamificação"
+                    >
+                        <Feather name="bar-chart-2" size={18} color="#fff" />
+                    </TouchableOpacity>
 
-                <TouchableOpacity
-                    onPress={() => navigation.navigate("Settings")}
-                    style={TaskListStyles.addBtn}
-                >
-                    <Text style={TaskListStyles.addText}>Opções</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate("Settings")}
+                        style={TaskListStyles.headerButton}
+                        accessibilityLabel="Opções"
+                        accessibilityHint="Navegue para as configurações"
+                    >
+                        <Feather name="settings" size={18} color="#fff" />
+                    </TouchableOpacity>
 
-                <TouchableOpacity
-                    onPress={() => navigation.navigate("Form")}
-                    style={TaskListStyles.addBtn}
-                >
-                    <Text style={TaskListStyles.addText}>+ Nova</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate("Form")}
+                        style={TaskListStyles.headerButton}
+                        accessibilityLabel="Nova tarefa"
+                        accessibilityHint="Crie uma nova tarefa"
+                    >
+                        <Feather name="plus" size={18} color="#fff" />
+                    </TouchableOpacity>
+                </View>
             </View>
 
+            {/* Statistics Bar */}
+            {totalTasks > 0 && (
+                <View
+                    style={{
+                        flexDirection: "row",
+                        gap: 12,
+                        marginBottom: 16,
+                        paddingHorizontal: 4,
+                    }}
+                >
+                    <View style={{ flex: 1, alignItems: "center" }}>
+                        <Text
+                            style={{
+                                fontSize: 12,
+                                color: "#999",
+                                marginBottom: 4,
+                            }}
+                        >
+                            Total
+                        </Text>
+                        <Text
+                            style={{
+                                fontSize: 18,
+                                fontWeight: "bold",
+                                color: "#0984e3",
+                            }}
+                        >
+                            {totalTasks}
+                        </Text>
+                    </View>
+                    <View style={{ flex: 1, alignItems: "center" }}>
+                        <Text
+                            style={{
+                                fontSize: 12,
+                                color: "#999",
+                                marginBottom: 4,
+                            }}
+                        >
+                            Pendentes
+                        </Text>
+                        <Text
+                            style={{
+                                fontSize: 18,
+                                fontWeight: "bold",
+                                color: "#f59e0b",
+                            }}
+                        >
+                            {pendingTasks}
+                        </Text>
+                    </View>
+                    <View style={{ flex: 1, alignItems: "center" }}>
+                        <Text
+                            style={{
+                                fontSize: 12,
+                                color: "#999",
+                                marginBottom: 4,
+                            }}
+                        >
+                            Concluídas
+                        </Text>
+                        <Text
+                            style={{
+                                fontSize: 18,
+                                fontWeight: "bold",
+                                color: "#27ae60",
+                            }}
+                        >
+                            {completedTasks}
+                        </Text>
+                    </View>
+                </View>
+            )}
+
+            {/* Filter Container */}
             <View style={TaskListStyles.filterContainer}>
-                <TouchableOpacity
-                    onPress={() => setFilter("all")}
-                    style={[
-                        TaskListStyles.filterBtn,
-                        filter === "all" && TaskListStyles.filterActive,
-                    ]}
-                >
-                    <Text style={TaskListStyles.filterText}>Todas</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    onPress={() => setFilter("completed")}
-                    style={[
-                        TaskListStyles.filterBtn,
-                        filter === "completed" && TaskListStyles.filterActive,
-                    ]}
-                >
-                    <Text style={TaskListStyles.filterText}>Concluídas</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    onPress={() => setFilter("pending")}
-                    style={[
-                        TaskListStyles.filterBtn,
-                        filter === "pending" && TaskListStyles.filterActive,
-                    ]}
-                >
-                    <Text style={TaskListStyles.filterText}>Pendentes</Text>
-                </TouchableOpacity>
+                {(["all", "pending", "completed"] as const).map((f) => (
+                    <TouchableOpacity
+                        key={f}
+                        onPress={() => setFilter(f)}
+                        style={[
+                            TaskListStyles.filterBtn,
+                            filter === f && TaskListStyles.filterBtnActive,
+                        ]}
+                        accessibilityLabel={getFilterLabel(f)}
+                        accessibilityRole="radio"
+                        accessibilityState={{ selected: filter === f }}
+                    >
+                        <Feather
+                            name={getFilterIcon(f) as any}
+                            size={16}
+                            color={filter === f ? "#FFFFFF" : "#6B7280"}
+                            style={{ marginRight: 6 }}
+                        />
+                        <Text
+                            style={[
+                                TaskListStyles.filterText,
+                                filter === f && TaskListStyles.filterTextActive,
+                            ]}
+                        >
+                            {getFilterLabel(f)}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
             </View>
 
+            {/* Task List */}
             <FlatList
                 data={filteredTasks}
                 keyExtractor={(item) => item.id}
@@ -155,10 +274,35 @@ export default function TaskListScreen({ navigation }: Props) {
                         onDelete={deleteTask}
                     />
                 )}
+                contentContainerStyle={TaskListStyles.listContent}
                 ListEmptyComponent={
-                    <Text style={TaskListStyles.empty}>
-                        Nenhuma tarefa cadastrada
-                    </Text>
+                    <View style={{ alignItems: "center", marginTop: 60 }}>
+                        <Feather
+                            name="inbox"
+                            size={64}
+                            color="#ccc"
+                            style={{ marginBottom: 16 }}
+                        />
+                        <Text style={TaskListStyles.empty}>
+                            {filter === "completed"
+                                ? "Nenhuma tarefa concluída"
+                                : filter === "pending"
+                                  ? "Nenhuma tarefa pendente"
+                                  : "Nenhuma tarefa cadastrada"}
+                        </Text>
+                        <Text
+                            style={{
+                                marginTop: 8,
+                                color: "#999",
+                                fontSize: 14,
+                                paddingHorizontal: 20,
+                                textAlign: "center",
+                            }}
+                        >
+                            {filter === "all" &&
+                                "Comece criando uma nova tarefa"}
+                        </Text>
+                    </View>
                 }
             />
         </View>

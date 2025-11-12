@@ -1,3 +1,4 @@
+import { Feather } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
@@ -12,6 +13,7 @@ import {
 } from "react-native";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
+import { Separator } from "../components/Separator";
 import { TagSelector } from "../components/TagSelector";
 import { TimeSelector } from "../components/TimeSelector";
 import { DEFAULT_TAG } from "../config/tags";
@@ -42,8 +44,6 @@ export default function TaskFormScreen({ route, navigation }: Props) {
     const [selectedTag, setSelectedTag] = useState<string>(
         existing?.selectedTag || DEFAULT_TAG,
     );
-    // Initialize notification times with existing values or empty array
-    // This ensures user-selected notification preferences persist when editing
     const [selectedTimes, setSelectedTimes] = useState<string[]>(
         existing?.notificationIds || [],
     );
@@ -51,6 +51,7 @@ export default function TaskFormScreen({ route, navigation }: Props) {
     useEffect(() => {
         navigation.setOptions({
             title: existing ? "Editar Tarefa" : "Nova Tarefa",
+            headerShown: true,
         });
     }, [existing, navigation]);
 
@@ -110,13 +111,36 @@ export default function TaskFormScreen({ route, navigation }: Props) {
         }
     }
 
+    const formatDateDisplay = () => {
+        if (!dueDate) return "Selecionar data (opcional)";
+        const d = new Date(dueDate);
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        if (d.toDateString() === today.toDateString()) return "Hoje";
+        if (d.toDateString() === tomorrow.toDateString()) return "Amanhã";
+        return d.toLocaleDateString("pt-BR", {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+        });
+    };
+
     return (
         <ScrollView
             style={TaskFormStyles.container}
-            contentContainerStyle={{ paddingBottom: 20 }}
+            contentContainerStyle={TaskFormStyles.scrollContent}
+            keyboardShouldPersistTaps="handled"
         >
+            {/* Section 1: Basic Task Information */}
+            <Text style={TaskFormStyles.sectionTitle}>Tarefa</Text>
+
             <View style={TaskFormStyles.formGroup}>
-                <Text style={TaskFormStyles.label}>Título</Text>
+                <Text style={TaskFormStyles.label}>Título *</Text>
+                <Text style={TaskFormStyles.hint}>
+                    Um nome claro e descritivo para sua tarefa
+                </Text>
                 <TextInput
                     value={title}
                     onChangeText={setTitle}
@@ -124,23 +148,37 @@ export default function TaskFormScreen({ route, navigation }: Props) {
                         TaskFormStyles.input,
                         !title && TaskFormStyles.inputError,
                     ]}
-                    placeholder="Ex: Estudar para prova"
+                    placeholder="Ex: Estudar para prova de matemática"
                     placeholderTextColor="#999"
-                    returnKeyType="done"
+                    returnKeyType="next"
+                    accessibilityLabel="Título da tarefa"
+                    accessible={true}
                 />
             </View>
 
             <View style={TaskFormStyles.formGroup}>
                 <Text style={TaskFormStyles.label}>Notas</Text>
+                <Text style={TaskFormStyles.hint}>
+                    Adicione detalhes, lembretes ou subtarefas
+                </Text>
                 <TextInput
                     value={notes}
                     onChangeText={setNotes}
-                    style={[TaskFormStyles.input, { height: 80 }]}
+                    style={[TaskFormStyles.input, TaskFormStyles.textAreaInput]}
                     multiline
-                    placeholder="Detalhes adicionais..."
+                    numberOfLines={4}
+                    placeholder="Ex: Revisar capítulos 1-3, fazer exercícios..."
                     placeholderTextColor="#999"
+                    textAlignVertical="top"
+                    accessibilityLabel="Notas da tarefa"
+                    accessible={true}
                 />
             </View>
+
+            <Separator theme={theme} variant="medium" />
+
+            {/* Section 2: Task Settings */}
+            <Text style={TaskFormStyles.sectionTitle}>Configurações</Text>
 
             <TagSelector
                 selectedTag={selectedTag}
@@ -148,25 +186,37 @@ export default function TaskFormScreen({ route, navigation }: Props) {
                 theme={theme}
             />
 
+            <View style={TaskFormStyles.formGroup}>
+                <Text style={TaskFormStyles.label}>Data de Vencimento</Text>
+                <Text style={TaskFormStyles.hint}>
+                    Defina quando a tarefa deve ser concluída
+                </Text>
+                <TouchableOpacity
+                    onPress={() => setShowPicker(true)}
+                    style={TaskFormStyles.dateBtn}
+                    accessibilityLabel="Data de vencimento"
+                    accessible={true}
+                >
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        }}
+                    >
+                        <Text style={TaskFormStyles.dateText}>
+                            {formatDateDisplay()}
+                        </Text>
+                        <Feather name="calendar" size={18} color="#3B82F6" />
+                    </View>
+                </TouchableOpacity>
+            </View>
+
             <TimeSelector
                 selectedTimes={selectedTimes}
                 onSelectTimes={setSelectedTimes}
                 theme={theme}
             />
-
-            <View style={TaskFormStyles.formGroup}>
-                <Text style={TaskFormStyles.label}>Data de Vencimento</Text>
-                <TouchableOpacity
-                    onPress={() => setShowPicker(true)}
-                    style={TaskFormStyles.dateBtn}
-                >
-                    <Text style={TaskFormStyles.dateText}>
-                        {dueDate
-                            ? date.toLocaleDateString("pt-BR")
-                            : "Selecionar data (opcional)"}
-                    </Text>
-                </TouchableOpacity>
-            </View>
 
             {showPicker && (
                 <DateTimePicker
@@ -177,16 +227,37 @@ export default function TaskFormScreen({ route, navigation }: Props) {
                 />
             )}
 
-            <TouchableOpacity
-                onPress={save}
-                disabled={!title.trim()}
-                style={[
-                    TaskFormStyles.saveBtn,
-                    !title.trim() && TaskFormStyles.saveBtnDisabled,
-                ]}
-            >
-                <Text style={TaskFormStyles.saveText}>Salvar Tarefa</Text>
-            </TouchableOpacity>
+            <Separator theme={theme} variant="medium" />
+
+            {/* Action Buttons */}
+            <View style={TaskFormStyles.buttonRow}>
+                <TouchableOpacity
+                    onPress={() => navigation.goBack()}
+                    style={TaskFormStyles.cancelBtn}
+                    accessibilityLabel="Cancelar"
+                    accessible={true}
+                >
+                    <Text style={TaskFormStyles.cancelButtonText}>
+                        Cancelar
+                    </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={save}
+                    disabled={!title.trim()}
+                    style={[
+                        TaskFormStyles.saveBtn,
+                        !title.trim() && TaskFormStyles.saveBtnDisabled,
+                    ]}
+                    accessibilityLabel="Salvar tarefa"
+                    accessible={true}
+                    accessibilityState={{ disabled: !title.trim() }}
+                >
+                    <Text style={TaskFormStyles.buttonText}>
+                        {existing ? "Atualizar" : "Criar"}
+                    </Text>
+                </TouchableOpacity>
+            </View>
         </ScrollView>
     );
 }

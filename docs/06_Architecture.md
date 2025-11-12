@@ -521,11 +521,3 @@ console.log("Scheduled:", scheduled);
 ### Issue: XP calculation seems wrong
 
 **Solution**: Check streak calculation, verify base rewards in tag config
-
-## Documentation Standards
-
-- Update docs when changing architecture
-- Document new services with examples
-- Keep README current
-- Comment complex algorithms
-- Link related documentation files
