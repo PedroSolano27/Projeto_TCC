@@ -407,17 +407,6 @@ refactor/what-was-refactored
 docs/what-was-documented
 ```
 
-### Commit Messages
-
-```
-[type] description
-
-fix: Correct notification reset bug
-feature: Add task export functionality
-refactor: Simplify gamification logic
-docs: Update API documentation
-```
-
 ### PR Guidelines
 
 1. Clear description of changes

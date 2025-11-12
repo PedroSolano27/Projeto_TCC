@@ -148,15 +148,6 @@ app/
 - Efficient re-render patterns
 - Event emitter for decoupled updates
 
-## Known Issues (Pre-Refactoring)
-
-The following issues have been identified and addressed in this refactoring:
-
-1. ✅ **Notification Reset Bug** - FIXED: Notifications reverted to default when editing tasks
-2. ✅ **Default Reminder Setting** - REMOVED: Eliminated problematic default reminder from settings
-3. ✅ **Component Documentation** - Split monolithic docs into modular sections
-4. ✅ **Code Comments** - Added inline documentation for complex logic
-
 ## Supported Platforms
 
 - **iOS**: Via Expo (with native stack navigator support)
