@@ -212,9 +212,14 @@ export function TaskStorage() {
                 const triggerDate = new Date(
                     Math.max(
                         due.getTime() - offsetMs,
-                        now.getTime() + 1000 * 10, // Ensure at least 10 seconds in future
+                        now.getTime() + 1000 * 60, // Ensure at least 1 minute in future
                     ),
                 );
+
+                // Only schedule if trigger is in the future
+                if (triggerDate.getTime() <= now.getTime()) {
+                    continue;
+                }
 
                 try {
                     const id = await Notifications.scheduleNotificationAsync({
@@ -222,6 +227,7 @@ export function TaskStorage() {
                             title: "Tarefa próxima do vencimento",
                             body: `${task.title}`,
                             data: { taskId: task.id },
+                            sound: true,
                         },
                         trigger: {
                             type: Notifications.SchedulableTriggerInputTypes
@@ -230,12 +236,17 @@ export function TaskStorage() {
                         },
                     });
                     notificationIds.push(id);
-                } catch {
+                } catch (err) {
+                    console.warn(
+                        `Erro ao agendar notificação para ${timeId}:`,
+                        err,
+                    );
                     // Continue with next notification time if this one fails
                     // Ensures partial success doesn't prevent other notifications
                 }
             }
-        } catch {
+        } catch (err) {
+            console.warn("Erro ao agendar lembretes:", err);
             // Return whatever notifications were successfully scheduled
             // Even if a validation error occurs mid-process
         }

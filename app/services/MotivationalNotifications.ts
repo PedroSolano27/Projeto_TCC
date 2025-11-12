@@ -55,7 +55,7 @@ export async function scheduleMotivationalNotification(
             content: {
                 title: message.title,
                 body: message.body,
-                sound: false,
+                sound: true,
             },
             trigger: {
                 type: Notifications.SchedulableTriggerInputTypes.DATE,

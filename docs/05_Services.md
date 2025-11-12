@@ -86,20 +86,82 @@ await completeTask(taskId);
 
 #### `scheduleReminders(task: Task): Promise<string[]>`
 
-Schedules multiple notifications for a task.
+Schedules multiple notifications for a task based on user-selected times.
 
 ```typescript
 const notificationIds = await scheduleReminders(task);
 ```
 
-**Returns**: Array of scheduled notification IDs
+**Returns**: Array of scheduled notification IDs (from Expo scheduler)
 
-**Constraints**:
+**Scheduling Logic**:
 
-- Task must have `dueDate`
-- Task must not be completed
-- Deadline must be between now and 7 days
-- Each time calculated from deadline
+1. Validates task has `dueDate` and is not completed
+2. For each user-selected notification time (e.g., "1h", "24h"):
+    - Calculates trigger date = deadline - selected hours
+    - Ensures trigger is at least 1 minute in future
+    - Schedules with audio enabled
+3. Returns array of successfully scheduled notification IDs
+
+**Configuration**:
+
+```typescript
+const NOTIFICATION_HOURS = {
+    "1h": 1, // 1 hour before deadline
+    "2h": 2, // 2 hours before deadline
+    "4h": 4, // 4 hours before deadline
+    "8h": 8, // 8 hours before deadline
+    "24h": 24, // 24 hours before deadline
+};
+```
+
+**Example Workflow**:
+
+```typescript
+// Task due on Jan 20, 2:00 PM
+const task = {
+    id: "123",
+    title: "Complete project",
+    dueDate: "2025-01-20T14:00:00Z",
+    notificationIds: ["1h", "24h"], // User selected these times
+    completed: false,
+};
+
+await scheduleReminders(task);
+// Result: Notifications scheduled for:
+//   - Jan 19, 2:00 PM (24 hours before)
+//   - Jan 20, 1:00 PM (1 hour before)
+```
+
+**Notification Content**:
+
+```
+Title: "Tarefa próxima do vencimento"
+Body: [task title]
+Sound: ✅ Enabled
+Data: { taskId: task.id }  // For analytics/interaction
+```
+
+**Important Notes**:
+
+- **Constraints**:
+    - Task must have `dueDate`
+    - Task must not be completed
+    - Deadline must be between now and 7 days
+    - Each selected time must have a valid mapping
+- **Minimum Future Time**: 1 minute (prevents scheduling past dates)
+- **Partial Success Handling**:
+    - If one notification fails to schedule, others still attempt
+    - Returns all successfully scheduled IDs
+    - Logs specific errors for debugging
+
+**Common Issues & Solutions**:
+
+| Issue                       | Cause                                                                    | Solution                                                |
+| --------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------- |
+| No notifications scheduled  | `notificationIds` array empty                                            | User must select notification times in form             |
+| Notifications don't trigger | Deadline is more than 7 days away                                        | Tasks >7 days use motivational reminders                |
+| Trigger date in past        | User selected impossible time (e.g., 24h before already-passed deadline) | Validation prevents past dates - skips if would be past |
 
 #### `cancelReminder(id: string): Promise<void>`
 
@@ -391,13 +453,28 @@ const xpForLevel5 = requiredXpForLevel(5);
 
 ### Purpose
 
-Sends gamification and motivational notifications.
+Sends gamification and motivational notifications with proper display and audio configuration.
+
+### Configuration
+
+```typescript
+// App.tsx - Notification Handler Configuration
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldShowAlert: true, // Display as alert
+        shouldPlaySound: true, // Play notification sound
+        shouldSetBadge: true, // Update app badge
+        shouldShowBanner: true, // Show notification banner
+        shouldShowList: true, // Add to notification list
+    }),
+});
+```
 
 ### Public Functions
 
 #### `sendGamificationNotification(title, body, delay?)`
 
-Sends a custom notification with sound.
+Sends a custom notification with sound and proper display.
 
 ```typescript
 await sendGamificationNotification(
@@ -406,6 +483,13 @@ await sendGamificationNotification(
     0, // delay in seconds (optional)
 );
 ```
+
+**Output**:
+
+- Title: "🎉 Level Up!"
+- Body: "You reached level 5!"
+- Sound: ✅ Enabled
+- Display: ✅ Alert + Banner + List
 
 #### `notifyLevelUp(level, coins)`
 
@@ -420,6 +504,7 @@ await notifyLevelUp(5, 100);
 ```
 Title: "🎉 Parabéns! Você subiu para o Nível 5!"
 Body: "Recebeu 100 moedas como recompensa!"
+Sound: ✅ Enabled
 ```
 
 #### `notifyBadgeUnlocked(badgeTitle, description)`
@@ -438,6 +523,7 @@ await notifyBadgeUnlocked(
 ```
 Title: "🏆 Nova Conquista Desbloqueada!"
 Body: "Uma Semana Incrível: Concluiu tarefas por 7 dias consecutivos"
+Sound: ✅ Enabled
 ```
 
 #### `notifyStreakMilestone(streak)`
@@ -451,7 +537,7 @@ await notifyStreakMilestone(30); // "30 dias de consistência!"
 
 #### `scheduleMotivationalNotification(hoursFromNow?)`
 
-Schedules a random motivational message.
+Schedules a random motivational message for later.
 
 ```typescript
 await scheduleMotivationalNotification(24); // Tomorrow
@@ -459,26 +545,41 @@ await scheduleMotivationalNotification(24); // Tomorrow
 
 **Motivational Messages** (8 variations):
 
-- "Você está indo bem! 🌟"
-- "Consecutivo incrível! 🔥"
-- "Parabéns pelo progresso! 🎉"
-- "Tempo de ser produtivo! ⏰"
-- "Quase lá! 💪"
-- "Bom trabalho! ✅"
-- "Você é incrível! 🚀"
-- "Apenas mais um? 📋"
+- "Você está indo bem! 🌟" - General encouragement
+- "Consecutivo incrível! 🔥" - Streak motivation
+- "Parabéns pelo progresso! 🎉" - Progress celebration
+- "Tempo de ser produtivo! ⏰" - Task reminder
+- "Quase lá! 💪" - Near-goal motivation
+- "Bom trabalho! ✅" - Work recognition
+- "Você é incrível! 🚀" - General motivation
+- "Apenas mais um? 📋" - Quick task push
+
+**Sound**: ✅ Enabled for audio feedback
 
 ### Error Handling
 
-- All errors logged to console
-- No errors thrown to UI
-- Notifications are best-effort
+- All errors logged to console with context
+- No errors thrown to UI (graceful degradation)
+- Notifications are best-effort delivery
+- Failed notifications don't block app flow
 
-### Notification Format
+### Notification Response Handling
 
-- Type: DATE-based trigger
-- Sound: true (gamification), false (motivational)
-- Data: Attached for analytics
+The app now includes a listener for notification responses:
+
+```typescript
+// app/App.tsx
+Notifications.addNotificationResponseReceivedListener((response) => {
+    console.log("Notificação tocada:", response.notification);
+    // Future: Can navigate to task or perform other actions
+});
+```
+
+This enables:
+
+- Tracking when users engage with notifications
+- Implementing task navigation from notifications
+- Analytics on notification effectiveness
 
 ---
 
