@@ -26,7 +26,6 @@ Notifications.setNotificationHandler({
 export default function App() {
     useEffect(() => {
         const initNotifications = async () => {
-            // Request notification permissions
             const { status: existingStatus } =
                 await Notifications.getPermissionsAsync();
 
@@ -43,11 +42,9 @@ export default function App() {
                 return;
             }
 
-            // Set up notification response listener for when user taps on a notification
             const subscription =
                 Notifications.addNotificationResponseReceivedListener(
                     (response) => {
-                        // Handle notification tap if needed
                         console.log(
                             "Notificação tocada:",
                             response.notification,

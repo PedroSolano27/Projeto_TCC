@@ -33,8 +33,7 @@ export function TaskStorage() {
 
     async function addTask(task: Task) {
         const tasks = await getAllTasks();
-        // Schedule notifications but keep the original time selections in notificationIds
-        // This preserves user preferences for when the task is edited later
+        // Agenda notificações
         await scheduleReminders(task);
         const withNotifications = {
             ...task,
@@ -94,7 +93,7 @@ export function TaskStorage() {
                 await notifyStreakMilestone(result.profile.streak);
             }
         } catch {
-            // Silently ignore errors during reward application
+            // Ignora erros silenciosamente
         }
     }
 
@@ -102,33 +101,27 @@ export function TaskStorage() {
         const tasks = await getAllTasks();
         const idx = tasks.findIndex((t) => t.id === updated.id);
 
-        // Cancel old scheduled notifications by iterating task history
+        // Cancela notificações agendadas de forma iterativa pelo histórico de tarefas
         if (idx !== -1 && tasks[idx]) {
-            // Try to cancel notifications from the stored task
-            // This handles both old Expo IDs and time selections gracefully
             if (
                 tasks[idx].notificationIds &&
                 Array.isArray(tasks[idx].notificationIds)
             ) {
                 for (const id of tasks[idx].notificationIds) {
-                    // Attempt to cancel - will fail silently if not a valid Expo ID
-                    // but that's OK if it's a time selection string
                     await cancelReminder(id);
                 }
             }
         }
 
-        // Always reschedule notifications if task is not completed
-        // This ensures consistency regardless of what was stored before
+        // Sempre reagenda notificações se tarefa não está completa
         let notificationIds: string[] | undefined;
         if (
             !updated.completed &&
             updated.notificationIds &&
             updated.notificationIds.length > 0
         ) {
-            // Schedule reminders based on the time selections from the form
+            // Agenda lembretes com base nas seleções de tempo do formulário
             await scheduleReminders(updated);
-            // Keep the time selections, not the Expo IDs
             notificationIds = updated.notificationIds;
         }
 
@@ -155,7 +148,7 @@ export function TaskStorage() {
                         });
                     }
                 } catch {
-                    // Silently ignore errors during reward application
+                    // Ignora erros silenciosamente
                 }
             }
         } else {
@@ -182,8 +175,7 @@ export function TaskStorage() {
         const notificationIds: string[] = [];
 
         try {
-            // Validate preconditions for scheduling notifications
-            // Tasks must have: due date, not be completed, and have selected notification times
+            // Validação para agendamento
             if (!task.dueDate || task.completed || !task.notificationIds) {
                 return [];
             }
@@ -192,31 +184,30 @@ export function TaskStorage() {
             const now = new Date();
             const diffMs = due.getTime() - now.getTime();
 
-            // Only schedule if deadline is in the future and within 7 days
-            // Prevents scheduling for past dates or too-far-future dates
+            // Só agenda se  a entrega for dentro de 7 dias
             if (diffMs <= 0 || diffMs > 1000 * 60 * 60 * 24 * 7) {
                 return [];
             }
 
-            // Schedule notification for each selected time
-            // Times map to hours before deadline (e.g., "1h" = 1 hour before)
+            // Agenda notificação para cada tempo selecionado
+            // Tempos mapeiam para horas antes do vencimento (ex: \"1h\" = 1 hora antes)
             for (const timeId of task.notificationIds) {
                 const hours =
                     NOTIFICATION_HOURS[
                         timeId as keyof typeof NOTIFICATION_HOURS
                     ];
-                if (!hours) continue; // Skip unknown time identifiers
+                if (!hours) continue; // Pula identificadores de tempo desconhecidos
 
-                // Calculate trigger date: deadline minus the selected hours
+                // Calcula data de acionamento: vencimento menos as horas selecionadas
                 const offsetMs = hours * 60 * 60 * 1000;
                 const triggerDate = new Date(
                     Math.max(
                         due.getTime() - offsetMs,
-                        now.getTime() + 1000 * 60, // Ensure at least 1 minute in future
+                        now.getTime() + 1000 * 60, // Garante pelo menos 1 minuto no futuro
                     ),
                 );
 
-                // Only schedule if trigger is in the future
+                // Agenda somente se o acionamento estiver no futuro
                 if (triggerDate.getTime() <= now.getTime()) {
                     continue;
                 }
@@ -238,17 +229,15 @@ export function TaskStorage() {
                     notificationIds.push(id);
                 } catch (err) {
                     console.warn(
-                        `Erro ao agendar notificação para ${timeId}:`,
+                        `Erro ao agendar notifica\u00e7\u00e3o para ${timeId}:`,
                         err,
                     );
-                    // Continue with next notification time if this one fails
-                    // Ensures partial success doesn't prevent other notifications
+                    // Continua com o próximo tempo de notificação se este falhar
                 }
             }
         } catch (err) {
             console.warn("Erro ao agendar lembretes:", err);
-            // Return whatever notifications were successfully scheduled
-            // Even if a validation error occurs mid-process
+            // Retorna quaisquer notificações agendadas com sucesso
         }
 
         return notificationIds;
@@ -260,7 +249,7 @@ export function TaskStorage() {
                 notificationId,
             );
         } catch {
-            // Silently ignore errors
+            // Ignora erros silenciosamente
         }
     }
 

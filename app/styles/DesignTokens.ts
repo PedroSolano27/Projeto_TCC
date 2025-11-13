@@ -1,9 +1,9 @@
-// Design tokens
+// Tokens de design
 
 export const ColorPalette = {
-    // Dark Theme - High contrast for accessibility
+    // Tema escuro - Alto contraste para acessibilidade
     dark: {
-        // Primary colors (Blue)
+        // Cores primárias (Azul)
         primary: {
             50: "#E3F2FD",
             100: "#BBDEFB",
@@ -12,14 +12,14 @@ export const ColorPalette = {
             700: "#1976D2",
             900: "#0D47A1",
         },
-        // Secondary colors (Indigo)
+        // Cores secundárias (Indigo)
         secondary: {
             500: "#6366F1",
             600: "#4F46E5",
             700: "#4338CA",
             900: "#1E1B4B",
         },
-        // Success colors (Green)
+        // Cores de sucesso (Verde)
         success: {
             400: "#4ADE80",
             500: "#22C55E",
@@ -27,7 +27,7 @@ export const ColorPalette = {
             700: "#15803D",
             900: "#14532D",
         },
-        // Warning colors (Amber)
+        // Cores de aviso (Laranja)
         warning: {
             400: "#FBBF24",
             500: "#F59E0B",
@@ -35,7 +35,7 @@ export const ColorPalette = {
             700: "#B45309",
             900: "#78350F",
         },
-        // Danger colors (Red)
+        // Cores de perigo (Vermelho)
         danger: {
             400: "#F87171",
             500: "#EF4444",
@@ -43,7 +43,7 @@ export const ColorPalette = {
             700: "#B91C1C",
             900: "#7F1D1D",
         },
-        // Neutrals (Grayscale)
+        // Neutros (Escala de cinza)
         neutral: {
             0: "#000000",
             50: "#F9FAFB",
@@ -58,21 +58,21 @@ export const ColorPalette = {
             900: "#111827",
             950: "#030712",
         },
-        // Surface colors
+        // Cores de superficie
         surface: "#1A1A1A",
         surfaceElevated: "#252525",
         surfaceHovered: "#2E2E2E",
         background: "#0F0F0F",
         backgroundSecondary: "#1A1A1A",
-        // Text colors
-        textPrimary: "#FFFFFF", // WCAG AAA - 19.56:1 contrast on background
-        textSecondary: "#D1D5DB", // WCAG AA - 7.38:1 contrast on background
-        textTertiary: "#9CA3AF", // WCAG AA - 4.85:1 contrast on background
-        // Interactive colors
+        // Cores de texto
+        textPrimary: "#FFFFFF",
+        textSecondary: "#D1D5DB",
+        textTertiary: "#9CA3AF",
+        // Cores interativas
         border: "#374151",
         borderLight: "#4B5563",
         divider: "#1F2937",
-        // Status colors
+        // Cores de status
         info: "#0EA5E9",
         statusSuccess: "#22C55E",
         statusWarning: "#F59E0B",
@@ -80,7 +80,7 @@ export const ColorPalette = {
     },
 
     light: {
-        // Primary colors (Blue)
+        // Cores primárias (Azul)
         primary: {
             50: "#EFF6FF",
             100: "#DBEAFE",
@@ -89,14 +89,14 @@ export const ColorPalette = {
             700: "#1D4ED8",
             900: "#1E3A8A",
         },
-        // Secondary colors (Indigo)
+        // Cores secundárias (Indigo)
         secondary: {
             500: "#6366F1",
             600: "#4F46E5",
             700: "#4338CA",
             900: "#312E81",
         },
-        // Success colors (Green)
+        // Cores de sucesso (Verde)
         success: {
             400: "#4ADE80",
             500: "#22C55E",
@@ -104,7 +104,7 @@ export const ColorPalette = {
             700: "#15803D",
             900: "#166534",
         },
-        // Warning colors (Amber)
+        // Cores de aviso (Laranja)
         warning: {
             400: "#FBBF24",
             500: "#F59E0B",
@@ -112,7 +112,7 @@ export const ColorPalette = {
             700: "#B45309",
             900: "#92400E",
         },
-        // Danger colors (Red)
+        // Cores de perigo (Vermelho)
         danger: {
             400: "#F87171",
             500: "#EF4444",
@@ -120,7 +120,7 @@ export const ColorPalette = {
             700: "#B91C1C",
             900: "#7F1D1D",
         },
-        // Neutrals (Grayscale)
+        // Neutros (Escala de cinza)
         neutral: {
             0: "#FFFFFF",
             50: "#F9FAFB",
@@ -135,21 +135,21 @@ export const ColorPalette = {
             900: "#111827",
             950: "#030712",
         },
-        // Surface colors
+        // Cores de superficie
         surface: "#FFFFFF",
         surfaceElevated: "#F9FAFB",
         surfaceHovered: "#F3F4F6",
         background: "#FAFBFC",
         backgroundSecondary: "#F3F4F6",
-        // Text colors
-        textPrimary: "#0F172A", // WCAG AAA - 16.77:1 contrast on light background
-        textSecondary: "#475569", // WCAG AA - 7.54:1 contrast on light background
-        textTertiary: "#64748B", // WCAG AA - 5.34:1 contrast on light background
-        // Interactive colors
+        // Cores de texto
+        textPrimary: "#0F172A",
+        textSecondary: "#475569",
+        textTertiary: "#64748B",
+        // Cores interativas
         border: "#CBD5E1",
         borderLight: "#E2E8F0",
         divider: "#E5E7EB",
-        // Status colors
+        // Cores de status
         info: "#0EA5E9",
         statusSuccess: "#16A34A",
         statusWarning: "#D97706",
@@ -158,13 +158,13 @@ export const ColorPalette = {
 };
 
 export const Typography = {
-    // Font families
+    // Família de fontes
     fontFamily: {
         default: "System",
         mono: "Courier New",
     },
 
-    // Font sizes (scaled for readability)
+    // Tamanho de fontes
     fontSize: {
         xs: 12,
         sm: 14,
@@ -176,7 +176,7 @@ export const Typography = {
         "4xl": 36,
     },
 
-    // Font weights
+    // Peso de fontes
     fontWeight: {
         light: "300" as const,
         normal: "400" as const,
@@ -186,7 +186,7 @@ export const Typography = {
         extrabold: "800" as const,
     },
 
-    // Line heights (for better readability)
+    // Altura de linhas
     lineHeight: {
         tight: 1.2,
         normal: 1.5,
@@ -194,7 +194,7 @@ export const Typography = {
         loose: 2,
     },
 
-    // Letter spacing
+    // Espaço de letras
     letterSpacing: {
         tight: -0.5,
         normal: 0,
@@ -282,11 +282,11 @@ export const Shadows = {
 };
 
 export const Breakpoints = {
-    sm: 320, // Small phones
-    md: 375, // Standard phones
-    lg: 425, // Large phones
+    sm: 320, // Dispositivos pequenos
+    md: 375, // Dispositivos médios
+    lg: 425, // Dispositivos grandes
     xl: 768, // Tablets
-    "2xl": 1024, // Large tablets
+    "2xl": 1024, // Tablets grandes
 };
 
 export const Animation = {
@@ -298,14 +298,14 @@ export const Animation = {
 
 export const ComponentTokens = {
     button: {
-        minHeight: 44, // Touch target size (WCAG)
+        minHeight: 44,
         minWidth: 44,
         paddingVertical: Spacing[3],
         paddingHorizontal: Spacing[4],
         borderRadius: BorderRadius.md,
     },
     input: {
-        minHeight: 44, // Touch target size (WCAG)
+        minHeight: 44,
         paddingVertical: Spacing[3],
         paddingHorizontal: Spacing[4],
         borderRadius: BorderRadius.base,
@@ -316,7 +316,7 @@ export const ComponentTokens = {
         borderRadius: BorderRadius.lg,
     },
     touchable: {
-        minHeight: 44, // Touch target size (WCAG)
+        minHeight: 44,
         minWidth: 44,
     },
 };

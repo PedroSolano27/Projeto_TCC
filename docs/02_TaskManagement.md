@@ -150,7 +150,7 @@ For each selected notification time:
 Return array of successfully scheduled notification IDs
 ```
 
-### Notification Persistence
+## Notification Persistence
 
 **🔧 CRITICAL FIX - Notification Saving Issue Resolved**
 
@@ -179,17 +179,6 @@ Previously, Expo notification IDs were overwriting user selections, causing noti
 5. Form displays correctly in TimeSelector
 6. On save, old notifications cancelled, new ones scheduled
 7. Original time selections persist for next edit
-
-**Cancelled when task is completed or deleted**
-
-**Updated when task is edited with new times selected**
-
-### Notification Persistence
-
-- Notification IDs stored in task's `notificationIds` array
-- Survives app restarts and device reboots
-- Cancelled when task is completed or deleted
-- Updated when task is edited with new times selected
 
 ### Notification Content
 

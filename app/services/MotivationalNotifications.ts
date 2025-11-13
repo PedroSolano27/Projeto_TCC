@@ -1,8 +1,5 @@
-// Serviço de notificações motivacionais e smart reminders
-
 import * as Notifications from "expo-notifications";
 
-// Mensagens motivacionais
 const motivationalMessages = [
     {
         title: "Você está indo bem! 🌟",
@@ -38,7 +35,6 @@ const motivationalMessages = [
     },
 ];
 
-// Agenda notificação motivacional
 export async function scheduleMotivationalNotification(
     hoursFromNow: number = 24,
 ) {
@@ -67,7 +63,6 @@ export async function scheduleMotivationalNotification(
     }
 }
 
-// Envia notificação de gamification
 export async function sendGamificationNotification(
     title: string,
     body: string,
@@ -93,7 +88,6 @@ export async function sendGamificationNotification(
     }
 }
 
-// Notificação para level up
 export async function notifyLevelUp(level: number, coins: number) {
     await sendGamificationNotification(
         `🎉 Parabéns! Você subiu para o Nível ${level}!`,
@@ -101,7 +95,6 @@ export async function notifyLevelUp(level: number, coins: number) {
     );
 }
 
-// Notificação para nova conquista
 export async function notifyBadgeUnlocked(
     badgeTitle: string,
     badgeDescription: string,
@@ -112,7 +105,6 @@ export async function notifyBadgeUnlocked(
     );
 }
 
-// Notificação para novo streak
 export async function notifyStreakMilestone(streak: number) {
     const message =
         streak === 7

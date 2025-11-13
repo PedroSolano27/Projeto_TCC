@@ -21,7 +21,7 @@ export const createStyles = (theme: Theme) => {
                 paddingHorizontal: Spacing[4],
                 backgroundColor: colors.background,
             },
-            // Header with title and action buttons
+            // Cabeçalho
             header: {
                 flexDirection: "row",
                 justifyContent: "space-between",
@@ -35,7 +35,7 @@ export const createStyles = (theme: Theme) => {
                 color: colors.textPrimary,
                 flex: 1,
             },
-            // Navigation buttons
+            // Botões de navegação
             headerButton: {
                 paddingHorizontal: Spacing[3],
                 paddingVertical: Spacing[2],
@@ -53,7 +53,7 @@ export const createStyles = (theme: Theme) => {
                 fontWeight: Typography.fontWeight.semibold,
                 fontSize: Typography.fontSize.sm,
             },
-            // Filter container with modern design
+            // Container de filtro
             filterContainer: {
                 flexDirection: "row",
                 justifyContent: "flex-start",
@@ -86,7 +86,7 @@ export const createStyles = (theme: Theme) => {
                 color: "#FFFFFF",
                 fontWeight: Typography.fontWeight.semibold,
             },
-            // Task list
+            // Lista de tarefas
             listContent: {
                 paddingBottom: Spacing[4],
             },
@@ -112,7 +112,7 @@ export const createStyles = (theme: Theme) => {
             scrollContent: {
                 paddingBottom: Spacing[6],
             },
-            // Section grouping
+            // Agrupamento de seção
             section: {
                 marginBottom: Spacing[6],
             },
@@ -125,7 +125,7 @@ export const createStyles = (theme: Theme) => {
                 textTransform: "uppercase",
                 letterSpacing: 0.5,
             },
-            // Form group
+            // Agrupamento de formulários
             formGroup: {
                 marginBottom: Spacing[4],
             },
@@ -141,7 +141,7 @@ export const createStyles = (theme: Theme) => {
                 marginBottom: Spacing[2],
                 fontStyle: "italic",
             },
-            // Input fields
+            // Inputs
             input: {
                 borderWidth: 1.5,
                 borderColor: colors.border,
@@ -165,7 +165,7 @@ export const createStyles = (theme: Theme) => {
                 height: 100,
                 textAlignVertical: "top",
             },
-            // Buttons
+            // Botões
             buttonRow: {
                 flexDirection: "row",
                 gap: Spacing[3],
@@ -205,7 +205,7 @@ export const createStyles = (theme: Theme) => {
                 fontWeight: Typography.fontWeight.semibold,
                 fontSize: Typography.fontSize.base,
             },
-            // Date picker
+            // Seletor de data
             dateBtn: {
                 borderWidth: 1.5,
                 borderColor: colors.border,
@@ -236,7 +236,7 @@ export const createStyles = (theme: Theme) => {
             scrollContent: {
                 paddingBottom: Spacing[6],
             },
-            // Settings sections
+            // Seção de configurações
             section: {
                 marginBottom: Spacing[6],
                 backgroundColor: colors.surface,
@@ -252,7 +252,7 @@ export const createStyles = (theme: Theme) => {
                 color: colors.textPrimary,
                 marginBottom: Spacing[3],
             },
-            // Settings row
+            // Linha de configurações
             row: {
                 flexDirection: "row",
                 alignItems: "center",
@@ -275,7 +275,7 @@ export const createStyles = (theme: Theme) => {
                 color: colors.textSecondary,
                 marginTop: Spacing[1],
             },
-            // Filter buttons
+            // Botões de filtro
             filterRow: {
                 flexDirection: "row",
                 gap: Spacing[2],
@@ -305,7 +305,7 @@ export const createStyles = (theme: Theme) => {
                 color: "#FFFFFF",
                 fontWeight: Typography.fontWeight.semibold,
             },
-            // Buttons
+            // Botões
             button: {
                 backgroundColor: colors.primary[600],
                 paddingHorizontal: Spacing[4],
@@ -343,7 +343,7 @@ export const createStyles = (theme: Theme) => {
                 borderColor: colors.border,
                 ...Shadows.xs,
             },
-            // Left side (checkbox + content)
+            // Lado esquerdo
             left: {
                 flexDirection: "row",
                 alignItems: "flex-start",
@@ -370,7 +370,7 @@ export const createStyles = (theme: Theme) => {
                 fontSize: 14,
                 fontWeight: Typography.fontWeight.bold,
             },
-            // Task metadata
+            // Metadata de tarefas
             meta: {
                 flex: 1,
             },
@@ -395,7 +395,7 @@ export const createStyles = (theme: Theme) => {
                 fontWeight: Typography.fontWeight.semibold,
                 marginTop: Spacing[1],
             },
-            // Right side (actions)
+            // Lado direito
             actions: {
                 flexDirection: "row",
                 gap: Spacing[1],
@@ -414,7 +414,7 @@ export const createStyles = (theme: Theme) => {
         }),
 
         GamificationStyles: StyleSheet.create({
-            // XP Container
+            // Container de XP
             xpContainer: {
                 width: "100%",
                 paddingHorizontal: Spacing[4],
@@ -455,7 +455,7 @@ export const createStyles = (theme: Theme) => {
                 borderRadius: BorderRadius.full,
             },
 
-            // Level-up Modal
+            // Modal de Level-up
             levelModalOverlay: {
                 flex: 1,
                 backgroundColor: "rgba(0,0,0,0.6)",
@@ -571,7 +571,7 @@ export const createStyles = (theme: Theme) => {
                 flexDirection: "row",
                 ...Shadows.sm,
             },
-            // Button variants
+            // Variantes de botão
             btn_primary: {
                 backgroundColor: colors.primary[600],
             },
@@ -584,11 +584,11 @@ export const createStyles = (theme: Theme) => {
             btn_secondary: {
                 backgroundColor: colors.neutral[200],
             },
-            // Disabled state
+            // Desabilitado
             disabled: {
                 opacity: 0.6,
             },
-            // Text
+            // Texto
             text: {
                 color: "#FFFFFF",
                 fontWeight: Typography.fontWeight.semibold,
@@ -840,7 +840,7 @@ export const createStyles = (theme: Theme) => {
         }),
 
         DashboardStyles: StyleSheet.create({
-            // Profile section
+            // Seção de perfil
             profileSection: {
                 paddingVertical: Spacing[4],
                 paddingHorizontal: Spacing[3],
@@ -865,7 +865,7 @@ export const createStyles = (theme: Theme) => {
                 borderColor: colors.border,
                 ...Shadows.sm,
             },
-            // Profile row
+            // Linha de perfil
             profileRow: {
                 flexDirection: "row",
                 justifyContent: "space-between",
@@ -892,7 +892,7 @@ export const createStyles = (theme: Theme) => {
             profileCoins: {
                 color: "#FFD700",
             },
-            // XP Bar
+            // Barra de XP
             xpContainer: {
                 marginTop: Spacing[3],
                 paddingTop: Spacing[3],
@@ -952,7 +952,7 @@ export const createStyles = (theme: Theme) => {
                 fontWeight: Typography.fontWeight.bold,
                 color: colors.textPrimary,
             },
-            // Stats section
+            // Seção de stats
             sectionTitle: {
                 fontSize: Typography.fontSize.lg,
                 fontWeight: Typography.fontWeight.bold,
@@ -992,7 +992,7 @@ export const createStyles = (theme: Theme) => {
                 fontWeight: Typography.fontWeight.extrabold,
                 color: colors.textPrimary,
             },
-            // Badges/Achievements
+            // Badges/Conquistas
             badgesSection: {
                 paddingVertical: Spacing[4],
                 paddingHorizontal: Spacing[4],
@@ -1030,7 +1030,7 @@ export const createStyles = (theme: Theme) => {
                 textAlign: "center",
                 marginTop: Spacing[1],
             },
-            // Recent tasks
+            // Tarefas recentes
             recentSection: {
                 paddingVertical: Spacing[4],
                 paddingHorizontal: Spacing[4],

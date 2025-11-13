@@ -19,7 +19,6 @@ function checkBadges(profile: {
 }): Badge[] {
     const newBadges: Badge[] = [];
 
-    // First Task Badge: Unlocks on first task completion
     if (!profile.badges.some((b) => b.id === "first-task")) {
         newBadges.push({
             id: "first-task",
@@ -29,7 +28,6 @@ function checkBadges(profile: {
         });
     }
 
-    // Streak Milestone: 7 consecutive days
     if (
         !profile.badges.some((b) => b.id === "7-day-streak") &&
         profile.streak >= 7
@@ -42,7 +40,6 @@ function checkBadges(profile: {
         });
     }
 
-    // Streak Milestone: 30 consecutive days
     if (
         !profile.badges.some((b) => b.id === "30-day-streak") &&
         profile.streak >= 30
@@ -55,7 +52,6 @@ function checkBadges(profile: {
         });
     }
 
-    // Level Milestone: Reached level 5
     if (!profile.badges.some((b) => b.id === "level-5") && profile.level >= 5) {
         newBadges.push({
             id: "level-5",
@@ -65,7 +61,6 @@ function checkBadges(profile: {
         });
     }
 
-    // Level Milestone: Reached level 10
     if (
         !profile.badges.some((b) => b.id === "level-10") &&
         profile.level >= 10
@@ -78,7 +73,6 @@ function checkBadges(profile: {
         });
     }
 
-    // Level Milestone: Reached level 20 (high-level achievement)
     if (
         !profile.badges.some((b) => b.id === "level-20") &&
         profile.level >= 20
@@ -91,7 +85,6 @@ function checkBadges(profile: {
         });
     }
 
-    // Points Milestone: Accumulated 100 points
     if (
         !profile.badges.some((b) => b.id === "100-points") &&
         profile.points >= 100
@@ -104,7 +97,6 @@ function checkBadges(profile: {
         });
     }
 
-    // Points Milestone: Accumulated 500 points
     if (
         !profile.badges.some((b) => b.id === "500-points") &&
         profile.points >= 500
@@ -117,7 +109,6 @@ function checkBadges(profile: {
         });
     }
 
-    // Points Milestone: Accumulated 1000 points (major achievement)
     if (
         !profile.badges.some((b) => b.id === "1000-points") &&
         profile.points >= 1000
@@ -136,19 +127,19 @@ function checkBadges(profile: {
 export async function applyCompletionRewards(task: Task) {
     const profile = await loadProfile();
 
-    // Get base rewards configured for the selected task tag
-    // These values are pre-configured and don't change per-completion
+    // Obtém recompensas base configuradas para a tag da tarefa
+    // Estes valores são pré-configurados e não mudam por conclusão
     const tagRewards = getTagRewards(task.selectedTag);
     const basePoints = tagRewards.basePoints;
     const baseXP = tagRewards.baseXP;
 
-    // Calculate streak: checks if completed today, yesterday, or there's a gap
-    // This prevents exploiting same-day completion for extra streak bonuses
+    // Calcula streak: verifica se completado hoje, ontem, ou há um intervalo
+    // Isso previne exploração da conclusão no mesmo dia para bônus extras
     const last = profile.lastCompletionDate
-        ? profile.lastCompletionDate.slice(0, 10) // Extract YYYY-MM-DD
+        ? profile.lastCompletionDate.slice(0, 10)
         : null;
 
-    const today = todayString(); // Get today as YYYY-MM-DD
+    const today = todayString();
 
     let newStreak = 1;
 
@@ -157,27 +148,21 @@ export async function applyCompletionRewards(task: Task) {
         yesterday.setDate(yesterday.getDate() - 1);
 
         if (last === yesterday.toISOString().slice(0, 10))
-            // Yesterday's date matched: streak continues, increment
             newStreak = Math.min(profile.streak + 1, 365);
-        else if (last === today)
-            // Same day as last completion: maintain streak (don't exploit)
-            newStreak = profile.streak;
-        // else: gap in dates, newStreak stays at 1 (reset)
+        else if (last === today) newStreak = profile.streak;
     }
 
-    // Calculate bonus based on streak (capped at 7 days for balance)
-    // Bonus multiplies both points and XP
+    // Calcula bonus baseado na streak
     const streakBonus = Math.min(newStreak, 7) * 2;
     const points = basePoints + streakBonus;
     const xpGain = baseXP + Math.floor(streakBonus * 0.5);
 
-    // Update profile with new statistics
+    // Atualiza perfil com estatísticas
     profile.points = (profile.points ?? 0) + points;
     profile.coins = (profile.coins ?? 0) + Math.floor(points / 5);
     profile.xp = (profile.xp ?? 0) + xpGain;
 
-    // Handle level progression: XP "overflows" to next level
-    // This loop handles multiple level-ups from single high-reward task
+    // Trata progressão de nível: XP "excedente" vai para o próximo nível
     let leveledUp = false;
     while (profile.xp >= requiredXpForLevel(profile.level + 1)) {
         profile.xp -= requiredXpForLevel(profile.level + 1);
@@ -185,17 +170,16 @@ export async function applyCompletionRewards(task: Task) {
         leveledUp = true;
     }
 
-    // Update streak and completion date for next calculation
+    // Atualiza streak
     profile.streak = newStreak;
     profile.lastCompletionDate = today;
 
-    // Check if any new badges were unlocked by these changes
+    // Checa se tem bagdges
     const newBadges = checkBadges(profile);
     if (newBadges.length) {
         profile.badges = [...(profile.badges ?? []), ...newBadges];
     }
 
-    // Persist all changes to storage
     await saveProfile(profile);
 
     return { profile, points, xpGain, leveledUp, newBadges };

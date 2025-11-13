@@ -1,9 +1,4 @@
-// Hook para o perfil do usuário
-
-// Tipos
 import { UserProfile } from "../types/GamificationTypes";
-
-// Terceiros
 import { useEffect, useState } from "react";
 import { loadProfile } from "../services/UserProfileStorage";
 

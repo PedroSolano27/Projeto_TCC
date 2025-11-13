@@ -1,5 +1,3 @@
-// Tipos para Gamificação
-
 export type Badge = {
     id: string;
     title: string;

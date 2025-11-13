@@ -1,17 +1,11 @@
-// Funções para exportar/importar tarefas
-
-// Tipos
-import { Task } from "../types/Task";
-
-// Terceiros
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import { useState } from "react";
 import { Alert } from "react-native";
+import { Task } from "../types/Task";
 import { TaskStorage } from "./TaskStorage";
 
-// Hook que fornece export/import de tarefas
 export function ExportTasks() {
     const { getAllTasks, addTask, updateTask, removeTask } = TaskStorage();
     const [loading, setLoading] = useState<boolean>(false);
@@ -21,7 +15,6 @@ export function ExportTasks() {
         return `tarefas-export-${ts}.json`;
     }
 
-    // Exporta Trefas
     async function exportTasks() {
         try {
             setLoading(true);

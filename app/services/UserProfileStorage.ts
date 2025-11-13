@@ -1,10 +1,5 @@
-// Storage para o usuário
-
-// Tipos
-import { UserProfile } from "../types/GamificationTypes";
-
-// Terceiros
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { UserProfile } from "../types/GamificationTypes";
 
 const STORAGE_KEY = "@user_profile_v1";
 
@@ -19,7 +14,6 @@ const defaults: UserProfile = {
     lastCompletionDate: null,
 };
 
-// Carrega perfil
 export async function loadProfile(): Promise<UserProfile> {
     try {
         const raw = await AsyncStorage.getItem(STORAGE_KEY);
@@ -34,7 +28,6 @@ export async function loadProfile(): Promise<UserProfile> {
     }
 }
 
-// Salva perfil
 export async function saveProfile(profile: UserProfile): Promise<void> {
     try {
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
@@ -43,7 +36,6 @@ export async function saveProfile(profile: UserProfile): Promise<void> {
     }
 }
 
-// Calcula xp necessário
 export function requiredXpForLevel(l: number) {
     return Math.round(100 * Math.pow(1.4, l - 1));
 }

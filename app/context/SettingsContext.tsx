@@ -50,7 +50,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         defaults.taskFilter,
     );
 
-    // Load settings from async storage on app initialization
+    // Carrega configurações do armazenamento assíncrono na inicialização do aplicativo
     useEffect(() => {
         let mounted = true;
         const loadSettings = async () => {
@@ -58,7 +58,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                 const raw = await AsyncStorage.getItem(STORAGE_KEY);
 
                 if (!raw) {
-                    // First time setup: save default settings
+                    // Primeira configuração: salva configurações padrão
                     await AsyncStorage.setItem(
                         STORAGE_KEY,
                         JSON.stringify(defaults),
@@ -70,7 +70,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                     setTaskFilterState(defaults.taskFilter);
                 }
 
-                // Load existing settings from storage
+                // Carrega configurações existentes do armazenamento
                 if (raw) {
                     const parsed = JSON.parse(raw) as Partial<Settings>;
 
@@ -94,7 +94,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         };
     }, []);
 
-    // Persist settings to async storage
+    // Persiste configurações para armazenamento assíncrono
     const persist = useCallback(
         async (next: Partial<Settings>) => {
             try {

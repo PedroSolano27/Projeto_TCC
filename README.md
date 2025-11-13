@@ -11,4 +11,4 @@ Orientador: Roger Sá da Silva
 Pendências:
 
 - Testar Notificações (em andamento)
-- Traduzir para pt-br
+- Traduzir documentação para para pt-br

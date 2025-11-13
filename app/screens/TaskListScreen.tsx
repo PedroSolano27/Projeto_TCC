@@ -21,7 +21,7 @@ export default function TaskListScreen({ navigation }: Props) {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [filter, setFilter] = useState<FilterType>("all");
 
-    // Apply filter logic
+    // Aplica filtro
     const filteredTasks = tasks.filter((task) => {
         switch (filter) {
             case "completed":
@@ -29,14 +29,13 @@ export default function TaskListScreen({ navigation }: Props) {
             case "pending":
                 return !task.completed;
             case "inProgress":
-                // In Progress: tasks started but not completed
                 return !task.completed;
             default:
                 return true;
         }
     });
 
-    // Calculate stats
+    // Calcula stats
     const totalTasks = tasks.length;
     const completedTasks = tasks.filter((t) => t.completed).length;
     const pendingTasks = tasks.filter((t) => !t.completed).length;

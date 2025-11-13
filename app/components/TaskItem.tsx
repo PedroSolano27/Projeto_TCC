@@ -18,7 +18,6 @@ export default function TaskItem({ task, onToggle, onEdit, onDelete }: Props) {
     const { TaskStyles } = createStyles(theme);
     const tagRewards = getTagRewards(task.selectedTag);
 
-    // Format due date
     const formatDueDate = (dateString?: string) => {
         if (!dateString) return null;
         const date = new Date(dateString);

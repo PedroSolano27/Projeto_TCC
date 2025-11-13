@@ -66,7 +66,7 @@ export default function DashboardScreen({ navigation }: Props) {
     const completionRate =
         totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-    // Calculate XP progress for the level
+    // Calcula progresso XP para o nível
     const requiredXP = Math.round(Math.pow(1.4, profile.level) * 100);
     const xpProgress = Math.min((profile.xp / requiredXP) * 100, 100);
 
@@ -79,7 +79,7 @@ export default function DashboardScreen({ navigation }: Props) {
         })
         .slice(0, 10);
 
-    // Badge icons/emojis
+    // Emojis de conquista
     const getBadgeEmoji = (badgeId: string) => {
         const emojiMap: { [key: string]: string } = {
             firstTask: "🎯",
@@ -97,14 +97,10 @@ export default function DashboardScreen({ navigation }: Props) {
 
     return (
         <ScrollView style={TaskListStyles.container}>
-            {/* Profile/Level Section */}
             <View style={DashboardStyles.profileSection}>
-                <Text style={DashboardStyles.welcomeText}>
-                    👋 Bem-vindo!
-                </Text>
+                <Text style={DashboardStyles.welcomeText}>👋 Bem-vindo!</Text>
 
                 <View style={DashboardStyles.profileCard}>
-                    {/* Level, Points, Coins Row */}
                     <View style={DashboardStyles.profileRow}>
                         <View style={DashboardStyles.profileColumn}>
                             <Text style={DashboardStyles.profileLabel}>
@@ -137,7 +133,6 @@ export default function DashboardScreen({ navigation }: Props) {
                         </View>
                     </View>
 
-                    {/* XP Progress Bar */}
                     <View style={DashboardStyles.xpContainer}>
                         <View
                             style={{
@@ -174,7 +169,6 @@ export default function DashboardScreen({ navigation }: Props) {
                     </View>
                 </View>
 
-                {/* Streak Card */}
                 <View style={DashboardStyles.streakCard}>
                     <Feather
                         name="zap"
@@ -203,8 +197,9 @@ export default function DashboardScreen({ navigation }: Props) {
                 </View>
             </View>
 
-            {/* Productivity Statistics */}
-            <Text style={DashboardStyles.sectionTitle}>📊 Estatísticas</Text>
+            <Text style={DashboardStyles.sectionTitle}>
+                📊 Estat\u00edsticas
+            </Text>
 
             <View style={DashboardStyles.statsRow}>
                 <View style={DashboardStyles.statCard}>
@@ -247,7 +242,6 @@ export default function DashboardScreen({ navigation }: Props) {
                 </View>
             </View>
 
-            {/* Achievements Section */}
             {profile.badges && profile.badges.length > 0 && (
                 <>
                     <Text style={DashboardStyles.sectionTitle}>
@@ -281,7 +275,6 @@ export default function DashboardScreen({ navigation }: Props) {
                 </>
             )}
 
-            {/* Recent Completed Tasks */}
             {recentCompleted.length > 0 && (
                 <>
                     <Text style={DashboardStyles.sectionTitle}>
