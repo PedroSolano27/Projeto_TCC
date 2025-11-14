@@ -1,49 +1,46 @@
 {
-  "expo": {
-    "name": "Projeto_TCC",
-    "slug": "Projeto_TCC",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./app/assets/icon.png",
-    "scheme": "projetotcc",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "package": "com.pedro_solano.Projeto_TCC"
-    },
-    "web": {
-      "output": "static"
-    },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./app/assets/icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+    "expo": {
+        "name": "Projeto_TCC",
+        "slug": "Projeto_TCC",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "icon": "./app/assets/icon.png",
+        "scheme": "projetotcc",
+        "userInterfaceStyle": "automatic",
+        "newArchEnabled": true,
+        "ios": {
+            "supportsTablet": true
+        },
+        "android": {
+            "package": "com.pedro_solano.Projeto_TCC"
+        },
+        "web": {
+            "output": "static"
+        },
+        "plugins": [
+            [
+                "expo-splash-screen",
+                {
+                    "image": "./app/assets/icon.png",
+                    "imageWidth": 200,
+                    "resizeMode": "contain",
+                    "backgroundColor": "#ffffff",
+                    "dark": {
+                        "backgroundColor": "#000000"
+                    }
+                }
+            ],
+            "expo-file-system",
+            "expo-document-picker",
+            "expo-web-browser"
+        ],
+        "experiments": {
+            "reactCompiler": true
+        },
+        "extra": {
+            "eas": {
+                "projectId": "a6185577-6b2d-42e3-b686-11f6c51b2c50"
+            }
         }
-      ],
-      "expo-file-system",
-      "expo-document-picker",
-      "expo-web-browser"
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "a6185577-6b2d-42e3-b686-11f6c51b2c50"
-      }
     }
-  }
 }

@@ -1,3 +1,4 @@
+import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
@@ -61,28 +62,30 @@ export default function App() {
     }, []);
 
     return (
-        <SettingsProvider>
-            <Stack.Navigator initialRouteName="List">
-                <Stack.Screen
-                    name="List"
-                    component={TaskListScreen}
-                    options={{ title: "Tarefas" }}
-                />
+        <NavigationContainer>
+            <SettingsProvider>
+                <Stack.Navigator initialRouteName="List">
+                    <Stack.Screen
+                        name="List"
+                        component={TaskListScreen}
+                        options={{ title: "Tarefas" }}
+                    />
 
-                <Stack.Screen
-                    name="Dashboard"
-                    component={DashboardScreen}
-                    options={{ title: "Progresso" }}
-                />
+                    <Stack.Screen
+                        name="Dashboard"
+                        component={DashboardScreen}
+                        options={{ title: "Progresso" }}
+                    />
 
-                <Stack.Screen name="Form" component={TaskFormScreen} />
+                    <Stack.Screen name="Form" component={TaskFormScreen} />
 
-                <Stack.Screen
-                    name="Settings"
-                    component={SettingsScreen}
-                    options={{ title: "Opções" }}
-                />
-            </Stack.Navigator>
-        </SettingsProvider>
+                    <Stack.Screen
+                        name="Settings"
+                        component={SettingsScreen}
+                        options={{ title: "Opções" }}
+                    />
+                </Stack.Navigator>
+            </SettingsProvider>
+        </NavigationContainer>
     );
 }
