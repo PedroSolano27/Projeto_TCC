@@ -32,7 +32,8 @@
             ],
             "expo-file-system",
             "expo-document-picker",
-            "expo-web-browser"
+            "expo-web-browser",
+            "expo-router"
         ],
         "experiments": {
             "reactCompiler": true
