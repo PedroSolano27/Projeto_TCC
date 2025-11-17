@@ -135,18 +135,37 @@ export function TaskStorage() {
 
             if (!wasCompleted && newTask.completed) {
                 try {
+                    // Aplica recompensas
                     const result = await applyCompletionRewards(newTask);
                     if (result?.leveledUp) {
                         gamificationEvents.emit("levelup", {
                             level: result.profile.level,
                             coins: result.profile.coins,
                         });
+                        await notifyLevelUp(
+                            result.profile.level,
+                            result.profile.coins,
+                        );
                     }
                     if (result?.points) {
                         gamificationEvents.emit("pointsEarned", {
                             points: result.points,
                             xp: result.xpGain,
                         });
+                    }
+                    if (result?.newBadges && result.newBadges.length > 0) {
+                        for (const badge of result.newBadges) {
+                            await notifyBadgeUnlocked(
+                                badge.title,
+                                badge.description,
+                            );
+                        }
+                    }
+                    if (
+                        result?.profile.streak === 7 ||
+                        result?.profile.streak === 30
+                    ) {
+                        await notifyStreakMilestone(result.profile.streak);
                     }
                 } catch {
                     // Ignora erros silenciosamente
@@ -230,7 +249,7 @@ export function TaskStorage() {
                     notificationIds.push(id);
                 } catch (err) {
                     console.warn(
-                        `Erro ao agendar notifica\u00e7\u00e3o para ${timeId}:`,
+                        `Erro ao agendar notificação para ${timeId}:`,
                         err,
                     );
                     // Continua com o próximo tempo de notificação se este falhar
