@@ -53,7 +53,6 @@ export default function SettingsScreen() {
             style={SettingsStyles.container}
             contentContainerStyle={SettingsStyles.scrollContent}
         >
-            {/* Theme Settings */}
             <View style={SettingsStyles.section}>
                 <View
                     style={{
@@ -85,7 +84,6 @@ export default function SettingsScreen() {
 
             <Separator theme={theme} variant="medium" />
 
-            {/* Task Filter Settings */}
             <View style={SettingsStyles.section}>
                 <View
                     style={{
@@ -106,7 +104,7 @@ export default function SettingsScreen() {
                 </View>
 
                 <Text style={SettingsStyles.description}>
-                    Escolha qual filtro é exibido ao abrir a lista de tarefas
+                    Escolha qual filtro é exibido ao iniciar o aplicativo
                 </Text>
 
                 <View style={SettingsStyles.filterRow}>
@@ -149,7 +147,6 @@ export default function SettingsScreen() {
 
             <Separator theme={theme} variant="medium" />
 
-            {/* Data Management */}
             <View style={SettingsStyles.section}>
                 <View
                     style={{
@@ -239,7 +236,6 @@ export default function SettingsScreen() {
                 </TouchableOpacity>
             </View>
 
-            {/* Info Section */}
             <Separator theme={theme} variant="medium" />
 
             <View style={SettingsStyles.section}>

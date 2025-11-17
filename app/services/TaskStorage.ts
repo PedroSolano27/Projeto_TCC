@@ -16,6 +16,7 @@ const NOTIFICATION_HOURS = {
     "2h": 2,
     "4h": 4,
     "8h": 8,
+    "12h": 12,
     "24h": 24,
 };
 

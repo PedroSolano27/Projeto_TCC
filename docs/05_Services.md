@@ -111,6 +111,7 @@ const NOTIFICATION_HOURS = {
     "2h": 2, // 2 hours before deadline
     "4h": 4, // 4 hours before deadline
     "8h": 8, // 8 hours before deadline
+    "12h": 12, // 12 hours before deadline
     "24h": 24, // 24 hours before deadline
 };
 ```
@@ -480,9 +481,15 @@ Sends a custom notification with sound and proper display.
 await sendGamificationNotification(
     "🎉 Level Up!",
     "You reached level 5!",
-    0, // delay in seconds (optional)
+    0, // delay in seconds (optional, default: 0)
 );
 ```
+
+**Parameters**:
+
+- `title` (string): Notification title
+- `body` (string): Notification message body
+- `delay` (number, optional): Seconds until notification triggers (default: 0 for immediate)
 
 **Output**:
 
@@ -490,6 +497,15 @@ await sendGamificationNotification(
 - Body: "You reached level 5!"
 - Sound: ✅ Enabled
 - Display: ✅ Alert + Banner + List
+
+**Delay Logic** (Fixed - Issue #3):
+
+- `delay = 0`: Immediate notification (no delay)
+- `delay = undefined`: 1-second default delay
+- `delay = 5`: 5-second delay
+
+**Previous Bug**: Used `(delay || 1)` which incorrectly treated `delay=0` as falsy, applying 1-second delay
+**Fix**: Now uses `(delay ?? 1)` to only apply 1-second default when delay is actually null/undefined
 
 #### `notifyLevelUp(level, coins)`
 
@@ -580,6 +596,87 @@ This enables:
 - Tracking when users engage with notifications
 - Implementing task navigation from notifications
 - Analytics on notification effectiveness
+
+### Notification Lifecycle and Persistence
+
+**Issue Addressed**: Notifications were lost when the app restarted or process terminated.
+
+**Solution**: App initialization now includes notification recovery and motivational notification scheduling.
+
+#### Initialization Flow (App.tsx)
+
+On app startup, the following sequence occurs:
+
+1. **Request Permissions**: Ensure notification permissions granted
+2. **Recover Pending Notifications**: Re-schedule notifications for all incomplete tasks
+3. **Initialize Motivational Notifications**: Schedule first daily motivational message
+4. **Attach Response Listener**: Listen for notification interactions
+
+**Code Implementation**:
+
+```typescript
+// App.tsx useEffect hook during initialization
+const initNotifications = async () => {
+    // ... permissions code ...
+
+    // Issue #2 Fix: Notification Recovery
+    // Re-schedule notifications for all pending tasks
+    // This ensures notifications survive app restart
+    try {
+        const { getAllTasks, scheduleReminders } = TaskStorage();
+        const tasks = await getAllTasks();
+
+        // Re-schedule notifications for all pending tasks
+        for (const task of tasks) {
+            if (!task.completed && task.notificationIds) {
+                await scheduleReminders(task);
+            }
+        }
+    } catch (err) {
+        console.warn("Erro ao recuperar notificações agendadas:", err);
+    }
+
+    // Issue #1 Fix: Motivational Notifications Initialization
+    // Schedule first daily motivational message
+    try {
+        await scheduleMotivationalNotification(24);
+    } catch (err) {
+        console.warn("Erro ao agendar notificação motivacional inicial:", err);
+    }
+
+    // ... subscription setup ...
+};
+```
+
+#### Benefits
+
+- ✅ **Notification Persistence**: Users no longer lose reminders on app restart
+- ✅ **Motivational Engagement**: Users receive daily motivational messages automatically
+- ✅ **Graceful Degradation**: Errors don't block app startup
+- ✅ **Lifecycle Management**: Notifications re-sync on every app launch
+
+#### Recovery Logic Details
+
+**How Recovery Works**:
+
+1. Load all tasks from AsyncStorage
+2. For each non-completed task with `notificationIds` (user-selected times):
+    - Call `scheduleReminders(task)` to reschedule notifications
+    - Skips completed tasks (no notifications needed)
+    - Skips tasks without notification preferences
+
+**Why Re-schedule?**
+
+- Expo notifications stored in memory are lost on process termination
+- Device restart also clears memory-only notifications
+- Re-scheduling ensures notifications reappear after app restart
+- Only affects pending tasks (completed tasks have no notifications anyway)
+
+**Performance Consideration**:
+
+- Only tasks with pending notifications are processed
+- Duplicate notifications avoided by app's notification ID tracking
+- Minimal overhead for typical task counts (usually < 100 tasks)
 
 ---
 

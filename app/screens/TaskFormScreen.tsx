@@ -133,7 +133,6 @@ export default function TaskFormScreen({ route, navigation }: Props) {
             contentContainerStyle={TaskFormStyles.scrollContent}
             keyboardShouldPersistTaps="handled"
         >
-            {/* Section 1: Basic Task Information */}
             <Text style={TaskFormStyles.sectionTitle}>Tarefa</Text>
 
             <View style={TaskFormStyles.formGroup}>
@@ -177,7 +176,6 @@ export default function TaskFormScreen({ route, navigation }: Props) {
 
             <Separator theme={theme} variant="medium" />
 
-            {/* Section 2: Task Settings */}
             <Text style={TaskFormStyles.sectionTitle}>Configurações</Text>
 
             <TagSelector
@@ -229,7 +227,6 @@ export default function TaskFormScreen({ route, navigation }: Props) {
 
             <Separator theme={theme} variant="medium" />
 
-            {/* Action Buttons */}
             <View style={TaskFormStyles.buttonRow}>
                 <TouchableOpacity
                     onPress={() => navigation.goBack()}

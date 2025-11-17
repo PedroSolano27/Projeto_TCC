@@ -90,7 +90,159 @@ Stack Navigator
 </Stack.Navigator>
 ```
 
-## State Management
+## App Initialization and Lifecycle
+
+### Startup Sequence
+
+When the app launches, `App.tsx` performs critical initialization in a specific order:
+
+```
+App Mounts
+    ↓
+useEffect Hook Runs
+    ↓
+Request Notification Permissions
+    ↓
+Notification Recovery (Issue #2 Fix)
+    ├─ Load all tasks from AsyncStorage
+    ├─ For each pending task with notifications:
+    │  └─ Re-schedule its reminders
+    └─ Ensure notifications survive app restart
+    ↓
+Motivational Notifications Init (Issue #1 Fix)
+    ├─ Schedule first daily motivational message
+    ├─ Message will appear 24 hours later
+    └─ User receives daily encouragement
+    ↓
+Attach Response Listener
+    └─ Track when users interact with notifications
+    ↓
+Initialization Complete
+    └─ App ready for user interaction
+```
+
+### Code Structure
+
+```typescript
+// app/App.tsx
+useEffect(() => {
+    const initNotifications = async () => {
+        // 1. Get and validate permissions
+        const { status } = await Notifications.getPermissionsAsync();
+        // ... request if needed ...
+
+        // 2. Recover pending notifications (Issue #2)
+        const { getAllTasks, scheduleReminders } = TaskStorage();
+        const tasks = await getAllTasks();
+        for (const task of tasks) {
+            if (!task.completed && task.notificationIds) {
+                await scheduleReminders(task);
+            }
+        }
+
+        // 3. Initialize motivational notifications (Issue #1)
+        await scheduleMotivationalNotification(24);
+
+        // 4. Setup notification response listener
+        const subscription =
+            Notifications.addNotificationResponseReceivedListener(
+                (response) => {
+                    console.log("Notification tapped:", response.notification);
+                },
+            );
+
+        return () => subscription.remove();
+    };
+
+    initNotifications();
+}, []); // Runs once on app mount
+```
+
+### Key Design Decisions
+
+**1. Centralized Initialization**
+
+All notification setup happens in one place (App.tsx) to ensure consistency:
+
+- ✅ Single source of truth
+- ✅ Guaranteed execution order
+- ✅ Easy to debug and modify
+
+**2. Recovery on Every Launch**
+
+Re-scheduling notifications on each app start:
+
+- ✅ Handles edge cases (crashed app, killed process)
+- ✅ No complex state tracking needed
+- ✅ Minimal performance impact
+
+**3. Error Tolerance**
+
+Each initialization step wrapped in try-catch:
+
+- ✅ One failure doesn't block others
+- ✅ App launches even if notifications fail
+- ✅ Graceful degradation
+
+**4. Background Resilience**
+
+Motivational notifications scheduled server-side (Expo):
+
+- ✅ Persist even if app closed
+- ✅ No manual rescheduling needed
+- ✅ Automatic system notification delivery
+
+### Notification Lifecycle
+
+#### Task Reminders (Task Due Date)
+
+```
+User creates task with due date
+    ↓
+User selects notification times (e.g., "1h", "24h")
+    ↓
+addTask() schedules reminders
+    ↓
+Notifications trigger before deadline
+    ↓
+On app restart: Recovery process re-schedules them
+    ↓
+User marks complete → Notifications cancelled
+```
+
+#### Motivational Messages (Daily)
+
+```
+App launches
+    ↓
+First motivational notification scheduled for +24h
+    ↓
+User receives motivational message
+    ↓
+When dismissed: App receives event (for future use)
+    ↓
+Future: Auto-schedule next message on response
+```
+
+#### Gamification Notifications (Immediate)
+
+```
+User completes task
+    ↓
+Gamification.ts emits event
+    ↓
+TaskStorage detects event
+    ↓
+Gamification reward calculated
+    ↓
+notifyLevelUp() / notifyBadgeUnlocked() called
+    ↓
+sendGamificationNotification() triggers immediately
+    ↓
+Notification appears on screen
+```
+
+---
 
 ### Global State (Context API)
 
@@ -146,9 +298,6 @@ type UserProfile = {
     /* ... */
 };
 type Badge = {
-    /* ... */
-};
-type Transaction = {
     /* ... */
 };
 ```

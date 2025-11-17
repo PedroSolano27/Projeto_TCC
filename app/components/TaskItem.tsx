@@ -48,14 +48,12 @@ export default function TaskItem({ task, onToggle, onEdit, onDelete }: Props) {
             accessibilityState={{ checked: task.completed }}
             accessibilityHint="Toque para marcar como concluído"
         >
-            {/* Left Section - Checkbox and Content */}
             <TouchableOpacity
                 onPress={() => onToggle(task.id)}
                 style={TaskStyles.left}
                 activeOpacity={0.7}
                 accessibilityRole="checkbox"
             >
-                {/* Checkbox */}
                 <View
                     style={[
                         TaskStyles.checkbox,
@@ -67,7 +65,6 @@ export default function TaskItem({ task, onToggle, onEdit, onDelete }: Props) {
                     )}
                 </View>
 
-                {/* Task Content */}
                 <View style={TaskStyles.meta}>
                     <Text
                         style={[
@@ -79,7 +76,6 @@ export default function TaskItem({ task, onToggle, onEdit, onDelete }: Props) {
                         {task.title}
                     </Text>
 
-                    {/* Due Date */}
                     {dueDate && (
                         <View
                             style={{
@@ -109,7 +105,6 @@ export default function TaskItem({ task, onToggle, onEdit, onDelete }: Props) {
                         </View>
                     )}
 
-                    {/* Tag Badge */}
                     {tagRewards && (
                         <View style={{ marginTop: 6 }}>
                             <Badge
@@ -123,7 +118,6 @@ export default function TaskItem({ task, onToggle, onEdit, onDelete }: Props) {
                 </View>
             </TouchableOpacity>
 
-            {/* Right Section - Actions */}
             <View style={TaskStyles.actions}>
                 <TouchableOpacity
                     onPress={() => onEdit(task)}

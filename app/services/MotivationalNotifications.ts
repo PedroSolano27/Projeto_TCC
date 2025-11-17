@@ -70,7 +70,7 @@ export async function sendGamificationNotification(
 ) {
     try {
         const triggerDate = new Date();
-        triggerDate.setSeconds(triggerDate.getSeconds() + (delay || 1));
+        triggerDate.setSeconds(triggerDate.getSeconds() + (delay ?? 1));
 
         await Notifications.scheduleNotificationAsync({
             content: {

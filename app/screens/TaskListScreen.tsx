@@ -120,7 +120,6 @@ export default function TaskListScreen({ navigation }: Props) {
 
     return (
         <View style={TaskListStyles.container}>
-            {/* Header */}
             <View style={TaskListStyles.header}>
                 <View>
                     <Text style={TaskListStyles.title}>Minhas Tarefas</Text>
@@ -156,7 +155,6 @@ export default function TaskListScreen({ navigation }: Props) {
                 </View>
             </View>
 
-            {/* Statistics Bar */}
             {totalTasks > 0 && (
                 <View
                     style={{
@@ -229,7 +227,6 @@ export default function TaskListScreen({ navigation }: Props) {
                 </View>
             )}
 
-            {/* Filter Container */}
             <View style={TaskListStyles.filterContainer}>
                 {(["all", "pending", "completed"] as const).map((f) => (
                     <TouchableOpacity
@@ -261,7 +258,6 @@ export default function TaskListScreen({ navigation }: Props) {
                 ))}
             </View>
 
-            {/* Task List */}
             <FlatList
                 data={filteredTasks}
                 keyExtractor={(item) => item.id}

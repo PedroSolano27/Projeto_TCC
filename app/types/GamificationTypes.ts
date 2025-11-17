@@ -16,11 +16,3 @@ export type UserProfile = {
     badges: Badge[];
     lastCompletionDate: string | null;
 };
-
-export type Transaction = {
-    id: string;
-    date: string;
-    amount: number;
-    reason: string;
-    type: "earn" | "spend";
-};

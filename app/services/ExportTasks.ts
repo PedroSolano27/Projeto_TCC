@@ -48,7 +48,6 @@ export function ExportTasks() {
         }
     }
 
-    // Importa Tarefas
     async function importTasks() {
         try {
             setLoading(true);

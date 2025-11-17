@@ -14,6 +14,7 @@ const NOTIFICATION_TIMES = [
     { id: "2h", label: "2 horas", hours: 2 },
     { id: "4h", label: "4 horas", hours: 4 },
     { id: "8h", label: "8 horas", hours: 8 },
+    { id: "12h", label: "12 horas", hours: 12 },
     { id: "24h", label: "1 dia", hours: 24 },
 ];
 
@@ -43,9 +44,7 @@ export function TimeSelector({ selectedTimes, onSelectTimes, theme }: Props) {
     return (
         <>
             <View style={TimeSelectorStyles.container}>
-                <Text style={TimeSelectorStyles.label}>
-                    Notificações (opcional)
-                </Text>
+                <Text style={TimeSelectorStyles.label}>Notificações</Text>
                 <TouchableOpacity
                     style={TimeSelectorStyles.trigger}
                     onPress={() => setShowModal(true)}
