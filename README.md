@@ -10,5 +10,6 @@ Orientador: Roger Sá da Silva
 
 Pendências:
 
+- Adicionar seletor de hora
 - Fase de teste com usuários reais (em andamento)
 - Traduzir documentação para para pt-br

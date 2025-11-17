@@ -100,7 +100,7 @@ export function TimeSelector({ selectedTimes, onSelectTimes, theme }: Props) {
                                                 TimeSelectorStyles.optionLabel
                                             }
                                         >
-                                            {time.label}
+                                            {`${time.label} antes de expirar`}
                                         </Text>
                                     </TouchableOpacity>
                                 );
