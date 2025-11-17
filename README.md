@@ -5,11 +5,14 @@ Repositório de aplicativo atualmente sendo desenvolvido para um TCC
 Para mais informações sobre o aplicativo, leia os arquivos dentro da pasta "docs"
 Aviso: O arquivos estão em inglês (por enquanto)
 
-Autor: Pedro Henrique Spasin Solano
-Orientador: Roger Sá da Silva
+- Autor: Pedro Henrique Spasin Solano
+- Orientador: Roger Sá da Silva
 
 Pendências:
 
 - Adicionar seletor de hora
+- Fazer build para iPhone (eca)
+- Alterar cor da "checkmark" do seletor de notificações
+- Adicionar borda no fim do fromulário de tarefas (problema com alguns dispositivos)
 - Fase de teste com usuários reais (em andamento)
 - Traduzir documentação para para pt-br
