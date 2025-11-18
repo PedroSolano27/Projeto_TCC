@@ -813,7 +813,7 @@ export const createStyles = (theme: Theme) => {
                 backgroundColor: colors.primary[600],
             },
             checkmark: {
-                color: "#FFFFFF",
+                color: colors.textPrimary,
                 fontWeight: Typography.fontWeight.bold,
                 fontSize: 12,
             },
