@@ -110,7 +110,7 @@ export const createStyles = (theme: Theme) => {
                 backgroundColor: colors.background,
             },
             scrollContent: {
-                paddingBottom: Spacing[6],
+                paddingBottom: Spacing[6] + Spacing[20],
             },
             // Agrupamento de seção
             section: {
@@ -234,7 +234,7 @@ export const createStyles = (theme: Theme) => {
                 backgroundColor: colors.background,
             },
             scrollContent: {
-                paddingBottom: Spacing[6],
+                paddingBottom: Spacing[6] + Spacing[20],
             },
             // Seção de configurações
             section: {
