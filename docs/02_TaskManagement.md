@@ -12,7 +12,7 @@ type Task = {
     title: string; // Task title (required, non-empty)
     selectedTag: string; // Single category from tag system
     notes?: string; // Optional additional notes
-    dueDate?: string; // Optional ISO date string
+    dueDate?: string; // Optional ISO date+time string (scheduled timestamp)
     createdAt: string; // ISO timestamp when created
     completed: boolean; // Completion status
     completedAt?: string; // ISO timestamp when completed
@@ -28,7 +28,7 @@ type Task = {
 | `title`           | `string`        | Task name/title displayed in lists               | Yes      |
 | `selectedTag`     | `string`        | Category ID from tag system (determines rewards) | Yes      |
 | `notes`           | `string`        | Additional task details and description          | No       |
-| `dueDate`         | `string` (ISO)  | Deadline date and time                           | No       |
+| `dueDate`         | `string` (ISO)  | Scheduled date and time for task deadline        | No       |
 | `createdAt`       | `string` (ISO)  | Task creation timestamp                          | Yes      |
 | `completed`       | `boolean`       | Whether task is marked as complete               | Yes      |
 | `completedAt`     | `string` (ISO)  | When task was completed                          | No       |
@@ -121,6 +121,44 @@ type TagRewardConfig = {
 3. Task removed from storage
 4. UI updates immediately
 
+## Task Status and Overdue Logic
+
+### Overdue Determination
+
+A task is marked as **overdue** only if:
+
+1. Its exact scheduled timestamp (`dueDate`) is strictly earlier than the current time
+2. The task is not yet completed
+
+**Key Points**:
+
+- Overdue status uses **precise timestamp comparison** (`dueDate.getTime() < Date.now()`)
+- A task scheduled for 2:00 PM becomes overdue at 2:00:01 PM
+- Completed tasks are never marked as overdue, regardless of when they're marked complete
+- Overdue status is re-evaluated in real-time as the user views the task list
+
+**Display Behavior**:
+
+- Overdue tasks show with red styling in the task list
+- Calendar icon changes to red (#ef4444)
+- Due date text shows in red with "(vencida)" indicator
+- Example: "Hoje (vencida)"
+
+### TaskItem Component Display
+
+The `TaskItem` component determines overdue status using:
+
+```typescript
+const isOverdue =
+    dueDateObj && dueDateObj.getTime() < Date.now() && !task.completed;
+```
+
+This ensures:
+
+- Precision: Millisecond-level accuracy for overdue determination
+- Accuracy: Only compares exact scheduled timestamps
+- Reliability: Uncompleting a task removes overdue status
+
 ## Notification System
 
 ### Overview
@@ -129,25 +167,121 @@ Tasks can have multiple notification times scheduled before their due date. Each
 
 ### Available Notification Times
 
+#### Preset Times
+
 - **1 hour** before deadline
 - **2 hours** before deadline
 - **4 hours** before deadline
 - **8 hours** before deadline
 - **24 hours** before deadline
 
+#### Custom Hour/Minute Notifications
+
+Users can also create custom notification times using the HourMinuteSelector component:
+
+- **Hours**: 0-23 (24-hour format)
+- **Minutes**: 0-59
+- **Format**: `custom_Xh_Ym` (e.g., `custom_3h_30m` for 3 hours 30 minutes)
+
+**Key Features**:
+
+- **Timestamp-Based Scheduling**: The selected date + hour/minute produces a single scheduled timestamp
+- **Past Prevention**: Users cannot schedule reminders for times already in the past
+- **Clear Error Messaging**: Inline error display when attempting past scheduling
+- **Validation**: Confirm button disabled when time is in past or no date selected
+
+**Example Custom Notifications**:
+
+| Time Input | ID               | Description               |
+| ---------- | ---------------- | ------------------------- |
+| 14:30      | `custom_14h_30m` | 2:30 PM on selected date  |
+| 00:15      | `custom_0h_15m`  | 12:15 AM on selected date |
+| 23:59      | `custom_23h_59m` | 11:59 PM on selected date |
+
+**Validation Rules**:
+
+| Scenario              | Error Message                           | Action                                   |
+| --------------------- | --------------------------------------- | ---------------------------------------- |
+| No date selected      | "Selecione uma data primeiro"           | Inputs disabled, confirm button disabled |
+| Selected time in past | "O horário selecionado está no passado" | Confirm button disabled (50% opacity)    |
+| Valid future time     | None                                    | Confirm button enabled                   |
+
+**Workflow**:
+
+1. User selects a due date
+2. HourMinuteSelector inputs become enabled
+3. User enters hour and minute
+4. Component validates against current time:
+    - If valid: No error, confirm button enabled
+    - If invalid: Shows error, confirm button disabled
+5. On confirm: Timestamp created, callback triggered
+6. TaskFormScreen extracts hour/minute and generates ID `custom_Xh_Ym`
+
+### Notification Selection UI
+
+The task form provides two complementary notification selection methods:
+
+1. **TimeSelector Component**: Quick access to preset times
+    - Located: `app/components/TimeSelector.tsx`
+    - Use case: Common reminder intervals
+    - Multi-select: Yes
+
+2. **HourMinuteSelector Component**: Custom time input
+    - Located: `app/components/HourMinuteSelector.tsx`
+    - Use case: Personalized notification timing
+    - Multi-select: Yes (multiple custom times can be added)
+
+Both components work together, allowing users to mix preset and custom notification times for flexible task management.
+
 ### Scheduling Logic
 
 Location: `app/services/TaskStorage.ts::scheduleReminders()`
 
+**Overview**:
+
+Notifications are scheduled relative to the task's due date. For each selected notification time (preset or custom), the system calculates when the notification should trigger and schedules it with Expo.
+
 ```
-For each selected notification time:
-  1. Calculate delay from current time to deadline minus notification time
-  2. Ensure trigger is at least 10 seconds in future
-  3. Schedule using expo-notifications
-  4. Store returned notification ID
+For each selected notification time (preset or custom):
+  1. Parse notification ID to extract hours and minutes
+  2. Calculate target time: dueDate - hours:minutes
+  3. If target time is in future (at least 10 seconds away):
+     - Schedule using expo-notifications
+     - Store returned notification ID
+  4. If target time is in past:
+     - Skip scheduling (cannot notify about past events)
   5. Continue with next time if any fail
 
 Return array of successfully scheduled notification IDs
+```
+
+**Timestamp Calculation Example**:
+
+```
+Task Due Date: 2025-11-18T14:30:00Z (Nov 18, 2:30 PM)
+Current Time: 2025-11-18T10:00:00Z (Nov 18, 10:00 AM)
+
+Preset Notification "1h":
+  - Trigger Time: 2025-11-18T13:30:00Z (Nov 18, 1:30 PM)
+  - Status: Valid (4.5 hours from now) ✓ Scheduled
+
+Custom Notification "custom_14h_30m":
+  - Trigger Time: 2025-11-18T14:30:00Z (Nov 18, 2:30 PM)
+  - Status: Valid (4.5 hours from now) ✓ Scheduled
+
+Custom Notification "custom_9h_0m":
+  - Trigger Time: 2025-11-18T05:30:00Z (Nov 18, 5:30 AM)
+  - Status: Invalid (in past) ✗ Skipped
+```
+
+**Custom Time Parsing Example**:
+
+```typescript
+// Input: ["1h", "custom_3h_30m", "24h"]
+// Processing:
+// - "1h" → notification 1 hour before dueDate
+// - "custom_3h_30m" → notification 3 hours 30 minutes before dueDate
+// - "24h" → notification 24 hours before dueDate
 ```
 
 ## Notification Persistence

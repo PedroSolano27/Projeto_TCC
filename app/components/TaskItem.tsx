@@ -38,7 +38,8 @@ export default function TaskItem({ task, onToggle, onEdit, onDelete }: Props) {
 
     const dueDate = formatDueDate(task.dueDate);
     const dueDateObj = task.dueDate ? new Date(task.dueDate) : null;
-    const isOverdue = dueDateObj && dueDateObj < new Date() && !task.completed;
+    const isOverdue =
+        dueDateObj && dueDateObj.getTime() < Date.now() && !task.completed;
 
     return (
         <View

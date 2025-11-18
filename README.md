@@ -10,9 +10,6 @@ Aviso: O arquivos estão em inglês (por enquanto)
 
 Pendências:
 
-- Adicionar seletor de hora
 - Fazer build para iPhone (eca)
-- Alterar cor da "checkmark" do seletor de notificações
-- Adicionar borda no fim do fromulário de tarefas (problema com alguns dispositivos)
 - Fase de teste com usuários reais (em andamento)
 - Traduzir documentação para para pt-br

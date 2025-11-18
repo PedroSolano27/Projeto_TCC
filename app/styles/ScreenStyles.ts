@@ -839,6 +839,132 @@ export const createStyles = (theme: Theme) => {
             },
         }),
 
+        HourMinuteSelectorStyles: StyleSheet.create({
+            trigger: {
+                borderWidth: 1.5,
+                borderColor: colors.border,
+                borderRadius: BorderRadius.md,
+                paddingVertical: Spacing[3],
+                paddingHorizontal: Spacing[4],
+                backgroundColor: colors.surface,
+                minHeight: 44,
+                justifyContent: "center",
+                marginBottom: Spacing[4],
+                ...Shadows.xs,
+            },
+            triggerText: {
+                color: colors.textPrimary,
+                fontSize: Typography.fontSize.base,
+                fontWeight: Typography.fontWeight.medium,
+            },
+            overlay: {
+                flex: 1,
+                backgroundColor: "rgba(0,0,0,0.5)",
+                justifyContent: "center",
+                alignItems: "center",
+                paddingHorizontal: Spacing[4],
+            },
+            modal: {
+                width: "100%",
+                maxWidth: 360,
+                backgroundColor: colors.surface,
+                borderRadius: BorderRadius.xl,
+                padding: Spacing[4],
+                ...Shadows.lg,
+            },
+            modalTitle: {
+                fontSize: Typography.fontSize.lg,
+                fontWeight: Typography.fontWeight.bold,
+                color: colors.textPrimary,
+                marginBottom: Spacing[1],
+            },
+            modalSubtitle: {
+                fontSize: Typography.fontSize.sm,
+                color: colors.textSecondary,
+                marginBottom: Spacing[4],
+            },
+            inputContainer: {
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: Spacing[4],
+                justifyContent: "space-between",
+                paddingHorizontal: Spacing[2],
+            },
+            inputGroup: {
+                flex: 1,
+                alignItems: "center",
+            },
+            label: {
+                fontSize: Typography.fontSize.sm,
+                fontWeight: Typography.fontWeight.semibold,
+                color: colors.textPrimary,
+                marginBottom: Spacing[2],
+            },
+            input: {
+                borderWidth: 1.5,
+                borderColor: colors.border,
+                borderRadius: BorderRadius.md,
+                paddingVertical: Spacing[2],
+                paddingHorizontal: Spacing[3],
+                fontSize: Typography.fontSize.lg,
+                fontWeight: Typography.fontWeight.bold,
+                color: colors.textPrimary,
+                backgroundColor: colors.background,
+                textAlign: "center",
+                minWidth: 70,
+                minHeight: 44,
+            },
+            unit: {
+                fontSize: Typography.fontSize.xs,
+                color: colors.textSecondary,
+                marginTop: Spacing[1],
+                fontWeight: Typography.fontWeight.medium,
+            },
+            separator: {
+                width: 40,
+                height: 2,
+                backgroundColor: colors.divider,
+                marginHorizontal: Spacing[2],
+            },
+            buttonContainer: {
+                flexDirection: "row",
+                gap: Spacing[3],
+                justifyContent: "space-between",
+            },
+            button: {
+                flex: 1,
+                paddingVertical: Spacing[3],
+                borderRadius: BorderRadius.md,
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: 44,
+                ...Shadows.sm,
+            },
+            cancelBtn: {
+                backgroundColor: colors.surfaceHovered,
+                borderWidth: 1.5,
+                borderColor: colors.border,
+            },
+            cancelBtnText: {
+                color: colors.textPrimary,
+                fontWeight: Typography.fontWeight.semibold,
+                fontSize: Typography.fontSize.base,
+            },
+            confirmBtn: {
+                backgroundColor: colors.primary[600],
+            },
+            confirmBtnText: {
+                color: "#FFFFFF",
+                fontWeight: Typography.fontWeight.semibold,
+                fontSize: Typography.fontSize.base,
+            },
+            errorText: {
+                color: "#ef4444",
+                fontSize: Typography.fontSize.sm,
+                fontWeight: Typography.fontWeight.medium,
+            },
+        }),
+
         DashboardStyles: StyleSheet.create({
             // Seção de perfil
             profileSection: {

@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
+import { HourMinuteSelector } from "../components/HourMinuteSelector";
 import { Separator } from "../components/Separator";
 import { TagSelector } from "../components/TagSelector";
 import { TimeSelector } from "../components/TimeSelector";
@@ -60,6 +61,7 @@ export default function TaskFormScreen({ route, navigation }: Props) {
         if (selectedDate) {
             setDate(selectedDate);
             setDueDate(selectedDate.toISOString());
+            return;
         }
     }
 
@@ -125,6 +127,14 @@ export default function TaskFormScreen({ route, navigation }: Props) {
             month: "short",
             day: "numeric",
         });
+    };
+
+    const handleCustomTime = (timestamp: string) => {
+        const due = new Date(timestamp);
+
+        setDate(due);
+        setDueDate(timestamp);
+        return;
     };
 
     return (
@@ -215,6 +225,20 @@ export default function TaskFormScreen({ route, navigation }: Props) {
                 onSelectTimes={setSelectedTimes}
                 theme={theme}
             />
+
+            <View style={TaskFormStyles.formGroup}>
+                <Text style={TaskFormStyles.label}>
+                    Notificação Customizada
+                </Text>
+                <Text style={TaskFormStyles.hint}>
+                    Defina um horário customizado para ser notificado
+                </Text>
+                <HourMinuteSelector
+                    onSelectTime={handleCustomTime}
+                    theme={theme}
+                    selectedDate={dueDate}
+                />
+            </View>
 
             {showPicker && (
                 <DateTimePicker
