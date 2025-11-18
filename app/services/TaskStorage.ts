@@ -219,16 +219,12 @@ export function TaskStorage() {
                 if (!hours) continue; // Pula identificadores de tempo desconhecidos
 
                 // Calcula data de acionamento: vencimento menos as horas selecionadas
-                const offsetMs = hours * 60 * 60 * 1000;
                 const triggerDate = new Date(
-                    Math.max(
-                        due.getTime() - offsetMs,
-                        now.getTime() + 1000 * 60, // Garante pelo menos 1 minuto no futuro
-                    ),
+                    due.getTime() - hours * 60 * 60 * 1000,
                 );
 
                 // Agenda somente se o acionamento estiver no futuro
-                if (triggerDate.getTime() <= now.getTime()) {
+                if (triggerDate.getTime() <= now.getTime() === true) {
                     continue;
                 }
 
@@ -236,7 +232,7 @@ export function TaskStorage() {
                     const id = await Notifications.scheduleNotificationAsync({
                         content: {
                             title: "Tarefa próxima do vencimento",
-                            body: `${task.title}`,
+                            body: `${task.title} - vence em ${hours}h`,
                             data: { taskId: task.id },
                             sound: true,
                         },

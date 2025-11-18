@@ -9,7 +9,6 @@ import SettingsScreen from "./screens/SettingsScreen";
 import TaskFormScreen from "./screens/TaskFormScreen";
 import TaskListScreen from "./screens/TaskListScreen";
 import { scheduleMotivationalNotification } from "./services/MotivationalNotifications";
-import { TaskStorage } from "./services/TaskStorage";
 import { RootStackParamList } from "./types/StackParamList";
 
 enableScreens();
@@ -18,7 +17,6 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
-        shouldShowAlert: true,
         shouldPlaySound: true,
         shouldSetBadge: true,
         shouldShowBanner: true,
@@ -44,20 +42,6 @@ export default function App() {
             if (finalStatus !== "granted") {
                 console.warn("Permissão de notificação não concedida");
                 return;
-            }
-
-            // Agenda notificações de novo
-            try {
-                const { getAllTasks, scheduleReminders } = TaskStorage();
-                const tasks = await getAllTasks();
-
-                for (const task of tasks) {
-                    if (!task.completed && task.notificationIds) {
-                        await scheduleReminders(task);
-                    }
-                }
-            } catch (err) {
-                console.warn("Erro ao re-agendar notificações:", err);
             }
 
             // Inicia notificações motivacionais
