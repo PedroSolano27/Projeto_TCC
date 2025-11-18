@@ -9,10 +9,19 @@
         "userInterfaceStyle": "automatic",
         "newArchEnabled": true,
         "ios": {
-            "supportsTablet": true
+            "supportsTablet": true,
+            "bundleIdentifier": "OrgaNize",
+            "infoPlist": {
+                "ITSAppUsesNonExemptEncryption": false
+            }
         },
         "android": {
-            "package": "com.pedro_solano.Projeto_TCC"
+            "package": "com.pedro_solano.Projeto_TCC",
+            "permissions": [
+                "android.permission.READ_EXTERNAL_STORAGE",
+                "android.permission.WRITE_EXTERNAL_STORAGE",
+                "android.permission.INTERNET"
+            ]
         },
         "web": {
             "output": "static"

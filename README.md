@@ -10,6 +10,5 @@ Aviso: O arquivos estão em inglês (por enquanto)
 
 Pendências:
 
-- Fazer build para iPhone (eca)
 - Fase de teste com usuários reais (em andamento)
 - Traduzir documentação para para pt-br
