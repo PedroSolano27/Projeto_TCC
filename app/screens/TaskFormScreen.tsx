@@ -220,18 +220,10 @@ export default function TaskFormScreen({ route, navigation }: Props) {
                 </TouchableOpacity>
             </View>
 
-            <TimeSelector
-                selectedTimes={selectedTimes}
-                onSelectTimes={setSelectedTimes}
-                theme={theme}
-            />
-
             <View style={TaskFormStyles.formGroup}>
-                <Text style={TaskFormStyles.label}>
-                    Notificação Customizada
-                </Text>
+                <Text style={TaskFormStyles.label}>Data Customizada</Text>
                 <Text style={TaskFormStyles.hint}>
-                    Defina um horário customizado para ser notificado
+                    Defina o horário (hora/minuto) para expiração
                 </Text>
                 <HourMinuteSelector
                     onSelectTime={handleCustomTime}
@@ -239,6 +231,12 @@ export default function TaskFormScreen({ route, navigation }: Props) {
                     selectedDate={dueDate}
                 />
             </View>
+
+            <TimeSelector
+                selectedTimes={selectedTimes}
+                onSelectTimes={setSelectedTimes}
+                theme={theme}
+            />
 
             {showPicker && (
                 <DateTimePicker
