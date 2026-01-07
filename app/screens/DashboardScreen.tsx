@@ -197,9 +197,7 @@ export default function DashboardScreen({ navigation }: Props) {
                 </View>
             </View>
 
-            <Text style={DashboardStyles.sectionTitle}>
-                📊 Estatísticas
-            </Text>
+            <Text style={DashboardStyles.sectionTitle}>📊 Estatísticas</Text>
 
             <View style={DashboardStyles.statsRow}>
                 <View style={DashboardStyles.statCard}>

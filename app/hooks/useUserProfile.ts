@@ -1,6 +1,6 @@
-import { UserProfile } from "../types/GamificationTypes";
 import { useEffect, useState } from "react";
 import { loadProfile } from "../services/UserProfileStorage";
+import { UserProfile } from "../types/GamificationTypes";
 
 export function useUserProfile() {
     const [profile, setProfile] = useState<UserProfile | null>(null);
